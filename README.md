@@ -33,3 +33,11 @@ _WebSocket API:_ Handles real-time bidirectional communication between clients a
 _AWS Lambda:_ Executes functions in response to WebSocket events, managing chat-related logic.
 
 _DynamoDB_: Stores and retrieves chat messages, ensuring scalability and low-latency access.
+
+### Contributing 🤝
+Contributions are welcome! Feel free to submit issues, feature requests, or pull requests. 
+
+#### Acknowledgments
+Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent tutorial that served as the foundation for this project. The original tutorial, [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
+
+
