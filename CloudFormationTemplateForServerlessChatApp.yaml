@@ -161,6 +161,20 @@ Resources:
       - ConnectHandlerServiceRoleDefaultPolicy
       - ConnectHandlerServiceRole
 
+  ConnectHandlerVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref ConnectHandler
+
+  ConnectHandlerAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref ConnectHandler
+      FunctionVersion: !GetAtt ConnectHandlerVersion.Version
+      Name: "Prod"
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 5
+
   #Disconnect Service Role
   DisconnectHandlerServiceRole:
     Type: AWS::IAM::Role
@@ -235,6 +249,21 @@ Resources:
     DependsOn:
       - DisconnectHandlerServiceRoleDefaultPolicy
       - DisconnectHandlerServiceRole
+
+  DisconnectHandlerVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref DisconnectHandler
+
+  DisconnectHandlerAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref DisconnectHandler
+      FunctionVersion: !GetAtt DisconnectHandlerVersion.Version
+      Name: "Prod"
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 5
+
   #Send Message Handler Service Role
   SendMessageHandlerServiceRole:
     Type: AWS::IAM::Role
@@ -339,6 +368,20 @@ Resources:
     DependsOn:
       - SendMessageHandlerServiceRoleDefaultPolicy
       - SendMessageHandlerServiceRole
+
+  SendMessageHandlerVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref SendMessageHandler
+
+  SendMessageHandlerAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref SendMessageHandler
+      FunctionVersion: !GetAtt SendMessageHandlerVersion.Version
+      Name: "Prod"
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 5
   #Default Handler Service Role
   DefaultHandlerServiceRole:
     Type: AWS::IAM::Role
