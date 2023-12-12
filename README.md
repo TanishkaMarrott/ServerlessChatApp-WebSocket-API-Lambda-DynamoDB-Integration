@@ -1,34 +1,45 @@
-## Build a Serverless Chat Application on AWS  🚀
-DynamoWave Chat is a serverless, real-time chat application powered by AWS Lambda, DynamoDB, and WebSocket API. This project is designed with a focus on system design principles, ensuring high availability, scalability, security, cost-optimization, and top-notch performance.
+## DynamoWave Chat - Serverless Real-time Chat Application  🚀
 
-### Features
+DynamoWave Chat is a serverless, real-time chat application powered by AWS Lambda, DynamoDB, and WebSocket API.
+DynamoWave Chat leverages the WebSocket API to facilitate seamless real-time communication, delivering users an interactive and engaging chat experience. This project is designed with a focus on System Design Principles, ensuring high availability, scalability, security, cost-optimization, and top-notch performance.
 
-#### Real-time Communication 
-DynamoWave Chat leverages WebSocket API to enable seamless real-time communication, providing users with an interactive and engaging chat experience.
 
-#### Serverless Architecture 
-The entire architecture is serverless, utilizing AWS Lambda for compute, DynamoDB for a NoSQL database, and WebSocket API for handling real-time connections. This ensures automatic scaling, reducing operational overhead and costs.
+### System Design Principles
 
-### System Design 
+#### Serverless Architecture:
+The entire architecture is Serverless, utilizing AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved.
 
 #### High Availability 
-With AWS services at its core, DynamoWave Chat inherits the high availability and fault-tolerance features of these services. DynamoDB, in particular, is designed for high availability with data replication across multiple Availability Zones.
+
+_Multi-AZ Deployments:_
+DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple Availability Zones (AZs) within a region.
+Lambda runs your function in multiple Availability Zones to ensure that it is available to process events in case of a service interruption in a single zone.
+The core services used here are implictly resilent to Zonal Failures.
+
+_Lambda Reserved Concurrency:_ Helps in controlling the maximum number of concurrent invocations of a Lambda Function, Helps in throttling and prevents Resource Exhaustion
+
 
 #### Scalability 
-The architecture is designed to scale horizontally, effortlessly handling an increasing number of users and messages. Auto-scaling features of Lambda and DynamoDB contribute to the system's ability to handle varying loads.
+
+_Lambda Provisioned Concurrency:_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+
+_DynamoDB Provisioned Throughput with Automatic Scaling:_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, implementing Dynamic scaling through Scaling Targets and Policies for automatic, workload-responsive adjustments. Optimizing resource-utilization and responsiveness.
+
 
 #### Security 
+_API Gateway Authorization & Authentication:_ using Cognito Authoriser
+
 IAM roles and policies are used to grant the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
 #### Cost-Optimization 
 By adopting a serverless architecture, DynamoWave Chat optimizes costs through a pay-as-you-go model. DynamoDB's on-demand capacity and Lambda's event-driven model contribute to cost efficiency.
 
 #### Performance Optimization 
-The use of DynamoDB provides low-latency data access, crucial for real-time applications. Additionally, AWS Lambda functions are designed for short-lived executions, contributing to low response times.
+Web-Socket APIs optimises performance, by establishing long-lived, persistent connections. It reduces the performance bottleneck that a stateless protocol poses. DynamoDB provides low-latency data access, hence and ideal Data Store here.
 
 ### System Architecture
 
-_WebSocket API:_ Handles real-time bidirectional communication between clients and the backend.
+_WebSocket API:_ Helps in Bi-directional communication, without the client having to poll for messages. Ultra-low latency for Real-Time Communication, 
 
 _AWS Lambda:_ Executes functions in response to WebSocket events, managing chat-related logic.
 
