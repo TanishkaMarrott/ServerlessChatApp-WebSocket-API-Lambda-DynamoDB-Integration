@@ -13,10 +13,11 @@ We have utilised AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebS
 
 _Multi-AZ Deployments:_
 DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple Availability Zones within a region.
-Lambda runs your function in multiple Availability Zones to ensure that it is available to process events in case of a service interruption in a single zone.
+Lambda ensures that it is available to process events in case of a service interruption in a single zone.
 The core services used here are implictly resilent to Zonal Failures.
 
-_Lambda Reserved Concurrency:_ Helps in controlling the maximum number of concurrent invocations of a Lambda Function, Helps in throttling and prevents Resource Exhaustion
+_Lambda Reserved Concurrency:_ 
+Helps in controlling the maximum number of concurrent invocations of a Lambda Function, Helps in throttling and prevents Resource Exhaustion
 
 
 #### Scalability 
@@ -27,7 +28,7 @@ _DynamoDB Provisioned Throughput with Automatic Scaling:_ Configured DynamoDB Pr
 
 
 #### Security 
-_API Gateway Authorization & Authentication:_ using Cognito Authoriser
+_API Gateway Authorization & Authentication:_ Cognito Authoriser
 
 _Fine Grained Access Control using IAM Roles:_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
