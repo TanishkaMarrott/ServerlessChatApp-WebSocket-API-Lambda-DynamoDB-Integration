@@ -7,12 +7,12 @@ DynamoWave Chat leverages the WebSocket API to facilitate seamless real-time com
 ### System Design Principles
 
 #### Serverless Architecture:
-The entire architecture is Serverless, utilizing AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved.
+We have utilised AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
 
 #### High Availability 
 
 _Multi-AZ Deployments:_
-DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple Availability Zones (AZs) within a region.
+DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple Availability Zones within a region.
 Lambda runs your function in multiple Availability Zones to ensure that it is available to process events in case of a service interruption in a single zone.
 The core services used here are implictly resilent to Zonal Failures.
 
@@ -29,13 +29,13 @@ _DynamoDB Provisioned Throughput with Automatic Scaling:_ Configured DynamoDB Pr
 #### Security 
 _API Gateway Authorization & Authentication:_ using Cognito Authoriser
 
-IAM roles and policies are used to grant the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+_Fine Grained Access Control using IAM Roles:_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
 #### Cost-Optimization 
 By adopting a serverless architecture, DynamoWave Chat optimizes costs through a pay-as-you-go model. DynamoDB's on-demand capacity and Lambda's event-driven model contribute to cost efficiency.
 
 #### Performance Optimization 
-Web-Socket APIs optimises performance, by establishing long-lived, persistent connections. It reduces the performance bottleneck that a stateless protocol poses. DynamoDB provides low-latency data access, hence and ideal Data Store here.
+Web-Socket APIs optimises performance, by establishing long-lived, persistent connections. It reduces the performance bottleneck that a stateless protocol poses. DynamoDB provides low-latency data access, hence an ideal Data Store here.
 
 ### System Architecture
 
