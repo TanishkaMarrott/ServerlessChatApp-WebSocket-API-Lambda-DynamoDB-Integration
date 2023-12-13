@@ -1,4 +1,4 @@
-## DynamoWave Chat - Serverless Real-time Chat Application  🚀
+## DynamoWave Chat - Serverless Real-time Chat Application  
 
 DynamoWave Chat is a serverless, real-time chat application powered by AWS Lambda, DynamoDB, and WebSocket API.
 DynamoWave Chat leverages the WebSocket API to facilitate seamless real-time communication, delivering users an interactive and engaging chat experience. This project is designed with a focus on System Design Principles, ensuring high availability, scalability, security, cost-optimization, and top-notch performance.
@@ -46,8 +46,8 @@ _AWS Lambda:_ Executes functions in response to WebSocket events, managing chat-
 
 _DynamoDB_: Stores and retrieves chat messages, ensuring scalability and low-latency access.
 
-### Contributing 🤝
-Contributions are welcome! Feel free to submit issues, feature requests, or pull requests. 
+### Contributing 
+Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
 
 #### Acknowledgments
 Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent tutorial that served as the foundation for this project. The original tutorial, [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
