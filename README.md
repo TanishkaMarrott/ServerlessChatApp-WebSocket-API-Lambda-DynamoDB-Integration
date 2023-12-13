@@ -7,18 +7,19 @@ DynamoWave Chat leverages the WebSocket API to facilitate seamless real-time com
 ### System Design Principles
 
 #### Serverless Architecture:
-We have utilised AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
+Follows a Serverless Architecture Pattern. Utilised AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
 
 #### High Availability 
 
 _Multi-AZ Deployments:_
 DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple Availability Zones within a region.
-Lambda ensures that it is available to process events in case of a service interruption in a single zone.
-The core services used here are implictly resilent to Zonal Failures.
+Lambda ensures it's available to process events in case of a service interruption in a single zone.
+The core services used here are inherently resilent to Zonal Failures.
 
 _Lambda Reserved Concurrency:_ 
 Helps in controlling the maximum number of concurrent invocations of a Lambda Function, Helps in throttling and prevents Resource Exhaustion
 
+_Throttling API requests or a better throughput:_ Configured Rate Limiting and Throttling for API Gateway. This helps in controlling both the volume and frequency of API Requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack.
 
 #### Scalability 
 
