@@ -2,7 +2,9 @@
 
 This is a serverless web application using AWS Lambda, DynamoDB, and WebSocket API via Amazon API Gateway. 
 
-This system, designed with a strong emphasis on high availability, scalability, and cost optimization, enables seamless real-time communication among users. This serverless architecture ensures efficient resource usage & cost-effectiveness. The WebSocket API, configured through Amazon API Gateway, provides a secure and scalable entry point for WebSocket communication.
+This system, designed with a strong emphasis on high availability, scalability, and cost optimization, enables real-time communication among users. 
+
+This serverless architecture ensures efficient resource usage with good scalability. The WebSocket API, configured through Amazon API Gateway, provides a secure and scalable entry point for WebSocket communication.
 
 
 ### System Design Principles
