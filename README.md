@@ -1,7 +1,8 @@
 ## DynamoWave Chat - Serverless Real-time Chat Application  
 
-DynamoWave Chat is a serverless, real-time chat application powered by AWS Lambda, DynamoDB, and WebSocket API.
-It leverages the WebSocket API to facilitate seamless real-time communication, delivering users an interactive and engaging chat experience. This project is designed with a focus on System Design Principles, ensuring high availability, scalability, security, cost-optimization, and top-notch performance.
+This is a serverless web application using AWS Lambda, DynamoDB, and WebSocket API via Amazon API Gateway. 
+
+This system, designed with a strong emphasis on high availability, scalability, and cost optimization, enables seamless real-time communication among users. This serverless architecture ensures efficient resource usage & cost-effectiveness. The WebSocket API, configured through Amazon API Gateway, provides a secure and scalable entry point for WebSocket communication.
 
 
 ### System Design Principles
@@ -32,11 +33,13 @@ _Provisioned Throughput for DynamoDB :_ Configured DynamoDB Provisioned Throughp
 #### Security 
 
 _Lambda Authoriser for API Gateway Authorization:_  
+
 _Fine Grained Access Control using IAM Roles & Policies:_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
 #### Cost-Optimization 
 
 Pay-as-You-Go compute offered by Lambda enables us to optimize on costs, 
+
 An Event-Driven Architecture pattern & Auto-Scaling would ensure we reduce idle resources, especially in the case of sporadic workloads. 
 Abstracting out the underlying infra helps in reducing associated costs. 
 
@@ -47,7 +50,7 @@ _Rate Limiting in API Gateway:_ Message rate limiting enables the control of the
 
 _Choice of WebSocket APIs over REST APIs:_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
 
-_NoSQL Database as a connection registry:_  
+_NoSQL Database as a connection registry:_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
 
 _
 
