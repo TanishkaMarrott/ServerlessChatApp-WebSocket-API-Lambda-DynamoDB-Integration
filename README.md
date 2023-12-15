@@ -10,12 +10,30 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 4. [Setup](#setup)
 5. [Usage](#usage)
 6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
-7. [Contributions](#contributing)
+7. [Contributions](#contributions)
 8. [Acknowledgements](#acknowledgements)
 
 ## Project Architecture and Components
-
+1- 
 ## Project Workflow
+
+1- A WebSocket connection is established, triggering the ConnectHandler Lambda function.
+
+2- The ConnectHandler Lambda function adds the connectionId to the ConnectionsTable in DynamoDB.
+
+3- If a WebSocket connection is closed, the DisconnectHandler Lambda function removes the connectionId from the ConnectionsTable.
+
+4- The SendMessageHandler Lambda function can be invoked to send messages to all connected clients by iterating through connectionIds in the ConnectionsTable.
+
+5- The DefaultHandler Lambda function provides information to a client when a WebSocket connection is established.
+
+The auto scaling configurations ensure that DynamoDB read and write capacities scale based on predefined metrics.
+The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
+
+The main aim of the template is to provide a scalable and maintainable architecture for handling WebSocket connections and managing communication between clients.
+
+
+
 
 ## Design Considerations
 
