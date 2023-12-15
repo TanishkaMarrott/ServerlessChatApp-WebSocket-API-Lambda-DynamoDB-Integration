@@ -1,35 +1,47 @@
-## DynamoWave Chat - Serverless Real-time Chat Application  
+# DynamoWave Chat - Serverless Real-time Chat Application  
 
-This is a serverless web application using AWS Lambda, DynamoDB, and WebSocket API via Amazon API Gateway. 
+DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB, and WebSocket API, to deliver a seamless communication experience. This is specifically designed, considering key System Design Principles.
 
-This system, designed with a strong emphasis on high availability, scalability, and cost optimization, enables real-time communication among users. 
+## Table of Contents
 
-This serverless architecture ensures efficient resource usage with good scalability. The WebSocket API, configured through Amazon API Gateway, provides a secure and scalable entry point for WebSocket communication.
+1. [Project Architecture and Components](#project-architecture-and-components)
+2. [Project Workflow](#project-workflow)
+3. [Design Considerations](#design-considerations)
+4. [Setup](#setup)
+5. [Usage](#usage)
+6. [Testing](#testing)
+7. [Contributing](#contributing)
+8. [Version History](#version-history)
+9. [License](#license)
+
+## Project Architecture and Components
+
+## Project Workflow
+
+## Design Considerations
 
 
-### System Design Principles
+### Serverless Architectural Pattern
 
-#### Serverless Architecture:
-Follows a Serverless Architecture Pattern. Utilised AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
+Utilises AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
 
-#### High Availability 
+### Availability 
 
-_Multi-AZ Deployments (Built-in) :_
-DynamoDB supports Multi-AZ deployments, automatically replicating data across multiple AZs within a region.
-Lambda & API Gateway are also resilent to zonal failures.
+_**Multi-AZ Deployments (Built-in) :**_
+The core services used here are implicitly resilent to Zonal Failures.
 
-_Reserved Concurrency in Lambda:_ 
+_**Set Reserved Concurrency in Lambda:**_ 
 Helps in controlling the maximum number of Concurrent Invocations of a Lambda Function. We won't lose requests due to other functions consuming all of the available concurrency.
 
-_Throttling in API Gateway:_ Configured Throttling for API Gateway. This helps in controlling both the volume of API requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack. The APIs thus wouldn't be overwhelmed by too many requests.
+_**Implemented Throttling in API Gateway:**_ This helps in controlling the volume of API requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack. The APIs thus wouldn't be overwhelmed by too many requests.
 
 #### Scalability 
 
-_Provisioned Concurrency for Lambda:_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+_**Provisioned Concurrency for Lambda:**_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
 
-_Provisioned Throughput for DynamoDB :_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, for a consistent and predictable performance.
+_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, for a consistent and predictable performance.
 
- _Automatic Scaling for DynamoDB:_ Implemented Dynamic Scaling through Scaling Targets and Policies for automatic, workload-responsive adjustments. Optimizing resource-utilization and responsiveness.
+ _**Automatic Scaling for DynamoDB:**_ Implemented Dynamic Scaling through Scaling Targets and Policies for automatic, workload-responsive adjustments. Optimizing resource-utilization and responsiveness.
 
 
 #### Security 
