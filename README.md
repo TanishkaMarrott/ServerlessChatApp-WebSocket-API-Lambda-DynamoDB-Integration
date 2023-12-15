@@ -10,9 +10,9 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 4. [Setup](#setup)
 5. [Usage](#usage)
 6. [Testing](#testing)
-7. [Contributing](#contributing)
+7. [Contributions](#contributing)
 8. [Version History](#version-history)
-9. [License](#license)
+9. [Acknowledgments](#acknowledgments)
 
 ## Project Architecture and Components
 
@@ -46,16 +46,17 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
 ### Security 
 
-_Lambda Authoriser for API Gateway Authorization:_  
+_**Lambda Authoriser for API Gateway Authorization:**_  
 
-_Fine Grained Access Control using IAM Roles & Policies:_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+_**Fine Grained Access Control using IAM Roles & Policies:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
 #### Cost-Optimization 
 
-**_Pay-as-You-Go compute:_** offered by Lambda enables us to optimize on costs, 
+**_Pay-as-You-Go compute - lambda:_** Enables us to optimize on costs. Serverless also helps in abstracting out the underlying infra and saving on associated costs.
 
-An Event-Driven Architecture pattern & Auto-Scaling would ensure we reduce idle resources, especially in the case of sporadic workloads. 
-Abstracting out the underlying infra helps in reducing associated costs. 
+**_Event-Driven Architecture pattern:_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
+
+**_Fine-Tuning Auto-Scaling Configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
 
 
 #### Performance Optimization 
@@ -93,9 +94,9 @@ How might I further optimize costs within my architecture while maintaining perf
 What operational efficiencies can be introduced?
 
 
-
-### Contributing 
+### Contributions 
 Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
+If you've got  suggestions on how I could further improvise 
 
 #### Acknowledgments
 Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent tutorial that served as the foundation for this project. The original tutorial, [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
