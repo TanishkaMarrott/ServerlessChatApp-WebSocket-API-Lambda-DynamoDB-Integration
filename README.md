@@ -9,17 +9,15 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
-6. [Testing](#testing)
+6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
 7. [Contributions](#contributing)
-8. [Version History](#version-history)
-9. [Acknowledgments](#acknowledgments)
+8. [Acknowledgements](#acknowledgements)
 
 ## Project Architecture and Components
 
 ## Project Workflow
 
 ## Design Considerations
-
 
 ### Serverless Architectural Pattern
 
@@ -77,7 +75,7 @@ _AWS Lambda:_ Executes functions in response to WebSocket events, managing chat-
 
 _DynamoDB_: Stores and retrieves chat messages, ensuring scalability and low-latency access.
 
-### Enhancements for the Current Architecture -  Thoughts and Strategies for Improvement
+### Enhancements for the Current Architecture
 
 How can I make my current architecture resilent to regional failures? 
 Use of CDNs for geographically dispersed users, deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
@@ -96,9 +94,9 @@ What operational efficiencies can be introduced?
 
 ### Contributions 
 Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
-If you've got  suggestions on how I could further improvise 
+If you've got  suggestions on how I could further improvise on the architectural / configurational aspects, please feel free to drop a message on tanishka.marrott@gmail.com. I'd love to hear your thoughts on this!
 
-#### Acknowledgments
+### Acknowledgements
 Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent tutorial that served as the foundation for this project. The original tutorial, [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
 
 
