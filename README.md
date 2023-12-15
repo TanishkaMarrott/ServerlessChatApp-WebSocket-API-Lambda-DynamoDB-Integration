@@ -35,16 +35,16 @@ Helps in controlling the maximum number of Concurrent Invocations of a Lambda Fu
 
 _**Implemented Throttling in API Gateway:**_ This helps in controlling the volume of API requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack. The APIs thus wouldn't be overwhelmed by too many requests.
 
-#### Scalability 
+### Scalability 
 
-_**Provisioned Concurrency for Lambda:**_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+_**Configured Provisioned Concurrency for Lambda:**_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
 
-_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, for a consistent and predictable performance.
+_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, for a consistent and predictable read/write performance.
 
- _**Automatic Scaling for DynamoDB:**_ Implemented Dynamic Scaling through Scaling Targets and Policies for automatic, workload-responsive adjustments. Optimizing resource-utilization and responsiveness.
+ _**Implemented Automatic Scaling for DynamoDB:**_ Dynamic Auto-Scaling through Targets and Policies for automatic, workload-responsive adjustments. Aids in resource-utilization & helps in cost optimisation
 
 
-#### Security 
+### Security 
 
 _Lambda Authoriser for API Gateway Authorization:_  
 
@@ -52,7 +52,7 @@ _Fine Grained Access Control using IAM Roles & Policies:_ Have granted the least
 
 #### Cost-Optimization 
 
-Pay-as-You-Go compute offered by Lambda enables us to optimize on costs, 
+**_Pay-as-You-Go compute:_** offered by Lambda enables us to optimize on costs, 
 
 An Event-Driven Architecture pattern & Auto-Scaling would ensure we reduce idle resources, especially in the case of sporadic workloads. 
 Abstracting out the underlying infra helps in reducing associated costs. 
