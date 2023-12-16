@@ -3,29 +3,30 @@
 DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB, and WebSocket API, to deliver a seamless communication experience. This is specifically designed, considering key System Design Principles.
 
 ## Table of Contents
+1. 
+2. [Project Architecture and Components](#project-architecture-and-components)
+3. [Project Workflow](#project-workflow)
+4. [Design Considerations](#design-considerations)
+5. [Setup](#setup)
+6. [Usage](#usage)
+7. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
+8. [Contributions](#contributions)
+9. [Acknowledgements](#acknowledgements)
 
-1. [Project Architecture and Components](#project-architecture-and-components)
-2. [Project Workflow](#project-workflow)
-3. [Design Considerations](#design-considerations)
-4. [Setup](#setup)
-5. [Usage](#usage)
-6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
-7. [Contributions](#contributions)
-8. [Acknowledgements](#acknowledgements)
 
 ## Project Architecture and Components
 1- 
 ## Project Workflow
 
-1- A WebSocket connection is established, triggering the ConnectHandler Lambda function.
+1- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
 
-2- The ConnectHandler Lambda function adds the connectionId to the ConnectionsTable in DynamoDB.
+2- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
 
-3- If a WebSocket connection is closed, the DisconnectHandler Lambda function removes the connectionId from the ConnectionsTable.
+3- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
 
-4- The SendMessageHandler Lambda function can be invoked to send messages to all connected clients by iterating through connectionIds in the ConnectionsTable.
+4- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
 
-5- The DefaultHandler Lambda function provides information to a client when a WebSocket connection is established.
+5- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
 
 The auto scaling configurations ensure that DynamoDB read and write capacities scale based on predefined metrics.
 The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
