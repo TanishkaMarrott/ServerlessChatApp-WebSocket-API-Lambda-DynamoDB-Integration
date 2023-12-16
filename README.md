@@ -5,35 +5,41 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 ## Table of Contents
 
 1. [System Architecture and Components](#system-architecture-and-components)
-2. [Project Workflow](#project-workflow)
+2. [The Workflow](#the-workflow)
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
-6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
+6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture)
 7. [Contributions](#contributions)
-8. [Acknowledgements](#acknowledgements)
+8. [Credit Attribution](#credit-attribution)
 
 
 ## System Architecture And Components
 
-The CloudFormation Template defines the AWS Architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda. API Gateway for the Websocket API, will be separately defined on the console.
+The CF Template shared above defines the architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
+
+API Gateway for the Websocket API, will be separately defined on the console.
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
+### API Gateway:-
+As stated above, WebSocket API through API Gateway allows for bidirectional, persistent data connections between Clients and Serverless Backends.
 
-**ConnectionsTable:** <br /> DynamoDB with primary Key named connectionsId.
+### NoSQL Datastore:-
+**ConnectionsTable:** <br /> This is the DynamoDB table with primary Key named _connectionsId_.
 
-**ConnectHandler:** <br /> Handles WebSocket connections. Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
+### Lambdas:-
+**ConnectHandler:** <br /> Lambda function to handle WebSocket connections. Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
 
 **DisconnectHandler:** <br /> Handles WebSocket disconnections
 Removes a connectionId from ConnectionsTable when a WebSocket connection is closed.
 
-**SendMessageHandler:** <br /> Sends messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
+**SendMessageHandler:** <br /> Function used to send messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
 
 **DefaultHandler**: <br /> Provides information to a client when a WebSocket connection is established
 
 
-## Project Workflow
+## The Workflow
 
 **Step 1**- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
 
@@ -70,27 +76,27 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
 ### Security 
 
-_**Lambda Authoriser for API Gateway Authorization:**_  
+_**Lambda Authoriser - API Gateway Authorization:**_  
 
-_**Fine Grained Access Control using IAM Roles & Policies:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+_**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
-#### Cost-Optimization 
+### Cost-Optimization 
 
-**_Event-Driven Architecture pattern / Pay-as-You-Go compute :_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
+**_Event-Driven Architectural Pattern:_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
 
-**_Fine-Tuning Auto-Scaling Configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
-
-
-#### Performance Optimization 
-
-_Rate Limiting in API Gateway:_ Message rate limiting enables the control of the load on the downstream systems that process the messages.
-
-_Choice of WebSocket APIs over REST APIs:_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
-
-_NoSQL Database as a connection registry:_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
+**_Auto-Scaling Configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
 
 
-### Enhancements for the Current Architecture
+### Performance Optimization 
+
+_**Rate Limiting in API Gateway:**_ Message rate limiting enables the control of the load on the downstream systems that process the messages.
+
+_**Choice of WebSocket APIs over REST APIs:**_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
+
+_**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
+
+
+### How could I enhance my Current Architecture?
 
 How can I make my current architecture resilent to regional failures? 
 Use of CDNs for geographically dispersed users, deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
@@ -111,7 +117,7 @@ What operational efficiencies can be introduced?
 Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
 If you've got  suggestions on how I could further improvise on the architectural / configurational aspects, please feel free to drop a message on tanishka.marrott@gmail.com. I'd love to hear your thoughts on this!
 
-### Acknowledgements
+### Credit Attribution
 Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent tutorial that served as the foundation for this project. The original tutorial, [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
 
 
