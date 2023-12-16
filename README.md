@@ -80,11 +80,12 @@ _**Lambda Authoriser - API Gateway Authorization:**_
 
 _**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
+
 ### Cost-Optimization 
 
-**_Event-Driven Architectural Pattern:_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
+**_Event-Driven architectural pattern:_** Pay-as-you-go model helps save on idle resources, cutting on unnecessary costs.
 
-**_Auto-Scaling Configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
+**_Auto-Scaling configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
 
 
 ### Performance Optimization 
