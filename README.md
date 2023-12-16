@@ -3,44 +3,81 @@
 DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB, and WebSocket API, to deliver a seamless communication experience. This is specifically designed, considering key System Design Principles.
 
 ## Table of Contents
-1. 
-2. [Project Architecture and Components](#project-architecture-and-components)
-3. [Project Workflow](#project-workflow)
-4. [Design Considerations](#design-considerations)
-5. [Setup](#setup)
-6. [Usage](#usage)
-7. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
-8. [Contributions](#contributions)
-9. [Acknowledgements](#acknowledgements)
+
+1. [System Architecture and Components](#system-architecture-and-components)
+2. [Project Workflow](#project-workflow)
+3. [Design Considerations](#design-considerations)
+4. [Setup](#setup)
+5. [Usage](#usage)
+6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
+7. [Contributions](#contributions)
+8. [Acknowledgements](#acknowledgements)
 
 
-## Project Architecture and Components
-1- 
+## System Architecture And Components
+
+The CloudFormation Template defines the AWS Architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda. 
+
+API Gateway for the Websocket API, will be separately defined on the console.
+
+**_Components Breakdown:-_**
+
+_Connections Table_
+Primary Key: connectionId
+Provisioned Throughput: 5 RCUs, 5 WCUs
+Auto-Scaling for DynamoDB Write Capacity:
+
+IAM Role: AutoScalingRole with permissions for describe and update table actions
+Scalable Target: WriteAutoScalingTarget for write capacity auto scaling
+Scaling Policy: WriteAutoScalingPolicy configured for the write auto scaling target
+
+Auto Scaling for DynamoDB Read Capacity:
+
+Scalable Target: ReadScalingTarget for read capacity auto scaling
+Scaling Policy: ReadAutoScalingPolicy configured for the read auto scaling target
+Connect Lambda Function:
+
+IAM Role: ConnectHandlerServiceRole with permissions for DynamoDB actions
+Lambda Function: ConnectHandler for handling WebSocket connections
+Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
+Disconnect Lambda Function:
+
+IAM Role: DisconnectHandlerServiceRole with permissions for DynamoDB actions
+Lambda Function: DisconnectHandler for handling WebSocket disconnections
+Removes a connectionId from ConnectionsTable when a WebSocket connection is closed
+Send Message Lambda Function:
+
+IAM Role: SendMessageHandlerServiceRole with permissions for DynamoDB and API Gateway actions
+Lambda Function: SendMessageHandler for sending messages to connected clients
+Retrieves all connectionIds from ConnectionsTable
+Sends a message to each connected client using ApiGatewayManagementApi
+Default Lambda Function:
+
+IAM Role: DefaultHandlerServiceRole with permissions for API Gateway actions
+Lambda Function: DefaultHandler provides information to a client when a WebSocket connection is established
+Manage Connections Policy:
+
+IAM Policy: manageConnections allowing the Lambda function SendMessageHandler to execute API Gateway actions related to managing connections
+Lambda Versions and Aliases
+
+ manage deployment and rollback.
+
+
 ## Project Workflow
 
-1- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
+Step 1- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
 
-2- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
+Step 2- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
 
-3- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
+Step 3- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
 
-4- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
+Step 4- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
 
-5- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
+Step 5- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
 
-The auto scaling configurations ensure that DynamoDB read and write capacities scale based on predefined metrics.
-The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
-
-The main aim of the template is to provide a scalable and maintainable architecture for handling WebSocket connections and managing communication between clients.
-
-
-
+The Auto-Scaling configurations ensure that DynamoDB read & write capacities scale based on predefined metrics. The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
 
 ## Design Considerations
-
-### Serverless Architectural Pattern
-
-Utilises AWS Lambda for Compute, DynamoDB for a NoSQL database, and WebSocket API for handling Real-time Connections. No infrastructure Provioning / Management Overhead involved. Makes it massively scalable and reduces associated costs.
 
 ### Availability 
 
@@ -69,9 +106,7 @@ _**Fine Grained Access Control using IAM Roles & Policies:**_ Have granted the l
 
 #### Cost-Optimization 
 
-**_Pay-as-You-Go compute - lambda:_** Enables us to optimize on costs. Serverless also helps in abstracting out the underlying infra and saving on associated costs.
-
-**_Event-Driven Architecture pattern:_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
+**_Event-Driven Architecture pattern / Pay-as-You-Go compute :_** Saves on Idle resources, and thus ensuring an efficient resource utilisation.
 
 **_Fine-Tuning Auto-Scaling Configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
 
@@ -84,15 +119,6 @@ _Choice of WebSocket APIs over REST APIs:_ Web-Socket API optimises performance 
 
 _NoSQL Database as a connection registry:_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
 
-_
-
-### System Architecture
-
-_WebSocket API:_ Helps in Bi-directional communication, without the client having to poll for messages. Ultra-low latency for Real-Time Communication, 
-
-_AWS Lambda:_ Executes functions in response to WebSocket events, managing chat-related logic.
-
-_DynamoDB_: Stores and retrieves chat messages, ensuring scalability and low-latency access.
 
 ### Enhancements for the Current Architecture
 
