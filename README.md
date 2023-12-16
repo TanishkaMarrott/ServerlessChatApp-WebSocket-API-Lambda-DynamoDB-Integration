@@ -16,66 +16,36 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
 ## System Architecture And Components
 
-The CloudFormation Template defines the AWS Architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda. 
+The CloudFormation Template defines the AWS Architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda. API Gateway for the Websocket API, will be separately defined on the console.
 
-API Gateway for the Websocket API, will be separately defined on the console.
+<img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
-**_Components Breakdown:-_**
 
-_Connections Table_
-Primary Key: connectionId
-Provisioned Throughput: 5 RCUs, 5 WCUs
-Auto-Scaling for DynamoDB Write Capacity:
+**ConnectionsTable:** <br /> DynamoDB with primary Key named connectionsId.
 
-IAM Role: AutoScalingRole with permissions for describe and update table actions
-Scalable Target: WriteAutoScalingTarget for write capacity auto scaling
-Scaling Policy: WriteAutoScalingPolicy configured for the write auto scaling target
+**ConnectHandler:** <br /> Handles WebSocket connections. Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
 
-Auto Scaling for DynamoDB Read Capacity:
+**DisconnectHandler:** <br /> Handles WebSocket disconnections
+Removes a connectionId from ConnectionsTable when a WebSocket connection is closed.
 
-Scalable Target: ReadScalingTarget for read capacity auto scaling
-Scaling Policy: ReadAutoScalingPolicy configured for the read auto scaling target
-Connect Lambda Function:
+**SendMessageHandler:** <br /> Sends messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
 
-IAM Role: ConnectHandlerServiceRole with permissions for DynamoDB actions
-Lambda Function: ConnectHandler for handling WebSocket connections
-Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
-Disconnect Lambda Function:
-
-IAM Role: DisconnectHandlerServiceRole with permissions for DynamoDB actions
-Lambda Function: DisconnectHandler for handling WebSocket disconnections
-Removes a connectionId from ConnectionsTable when a WebSocket connection is closed
-Send Message Lambda Function:
-
-IAM Role: SendMessageHandlerServiceRole with permissions for DynamoDB and API Gateway actions
-Lambda Function: SendMessageHandler for sending messages to connected clients
-Retrieves all connectionIds from ConnectionsTable
-Sends a message to each connected client using ApiGatewayManagementApi
-Default Lambda Function:
-
-IAM Role: DefaultHandlerServiceRole with permissions for API Gateway actions
-Lambda Function: DefaultHandler provides information to a client when a WebSocket connection is established
-Manage Connections Policy:
-
-IAM Policy: manageConnections allowing the Lambda function SendMessageHandler to execute API Gateway actions related to managing connections
-Lambda Versions and Aliases
-
- manage deployment and rollback.
+**DefaultHandler**: <br /> Provides information to a client when a WebSocket connection is established
 
 
 ## Project Workflow
 
-Step 1- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
+**Step 1**- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
 
-Step 2- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
+**Step 2**- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
 
-Step 3- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
+**Step 3**- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
 
-Step 4- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
+**Step 4**- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
 
-Step 5- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
+**Step 5**- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
 
-The Auto-Scaling configurations ensure that DynamoDB read & write capacities scale based on predefined metrics. The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
+Scaling policies, and targets would help ensure that DynamoDB read & write capacities scale based on predefined metrics. The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
 
 ## Design Considerations
 
