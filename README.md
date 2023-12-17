@@ -5,7 +5,7 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 ## Table of Contents
 
 1. [System Architecture and Components](#system-architecture-and-components)
-2. [The Workflow](#the-workflow)
+2. [Project Workflow](#project-workflow)
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
@@ -16,14 +16,14 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
 ## System Architecture And Components
 
-The CF Template shared above defines the architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
+The CloudFormation Template I've shared above defines the architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
 
-API Gateway for the Websocket API, will be separately defined on the console.
+API Gateway for the Websocket API, will be separately defined on the console. (Will be sharing shortly)
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
 ### API Gateway:-
-As stated above, WebSocket API through API Gateway allows for bidirectional, persistent data connections between Clients and Serverless Backends.
+As stated above, the WebSocket API through API Gateway allows for bidirectional, persistent data connections between Clients and Serverless Backends.
 
 ### NoSQL Datastore:-
 **ConnectionsTable:** <br /> This is the DynamoDB table with primary Key named _connectionsId_.
@@ -76,7 +76,7 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
 ### Security 
 
-_**Lambda Authoriser - API Gateway Authorization:**_  
+_**Lambda Authoriser - API Gateway Authorization:**_  (Snaps to be shared shortly)
 
 _**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
