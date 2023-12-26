@@ -11,7 +11,7 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
-6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture)
+6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
 7. [Contributions](#contributions)
 8. [Credit Attribution](#credit-attribution)
 
@@ -117,21 +117,22 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 </br>
 
-### How could I enhance my Current Architecture?
+### Enhancements for the Current Architecture
 
-How can I make my current architecture resilent to regional failures? 
+**How can I make my current architecture resilent to regional failures?**
+
 Use of CDNs for geographically dispersed users, deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
 
 Use Route 53 health checks to control DNS failover from an API Gateway API in a primary region to an API Gateway API in a secondary regionConfigure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), Cost-Redundancy Tradeoff.
 
-What other strategies can be implemented to make this architecture even more scalable?
+**What other strategies can be implemented to make this architecture even more scalable?**
 Custom Auto-Scaling Logic using CloudWatch Alarms
 
-How can I make this even more secure & withstand potential threats?
+**How can I make this even more secure & withstand potential threats?**
 
-How might I further optimize costs within my architecture while maintaining performance?
+**How might I further optimize costs within my architecture while maintaining performance?**
 
-What operational efficiencies can be introduced?
+**What operational efficiencies can be introduced?**
 
 
 ### Contributions 
