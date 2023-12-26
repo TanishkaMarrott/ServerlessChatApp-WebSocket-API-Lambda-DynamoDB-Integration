@@ -1,24 +1,26 @@
-# DynamoWave Chat - Serverless Real-time Chat Application  
+# DynamoWave Chat - A Serverless Real-time Chat Application
 
-DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB, and WebSocket API, to deliver a seamless communication experience. This is specifically designed, considering key System Design Principles.
+DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB and WebSocket API, to deliver a seamless communication experience. Focus here lies on the key System Design Principles.
 
 ## Table of Contents
 
 1. [System Architecture and Components](#system-architecture-and-components)
-2. [Project Workflow](#project-workflow)
+2. [The Workflow](#the-workflow)
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
-6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture)
+6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture?)
 7. [Contributions](#contributions)
 8. [Credit Attribution](#credit-attribution)
 
 
 ## System Architecture And Components
 
-The CloudFormation Template I've shared above defines the architecture for handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
+The CF Template defines the part responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
 
-API Gateway for the Websocket API, will be separately defined on the console. (Will be sharing shortly)
+The WebSocket API (via the API Gateway) has been built using the AWS Console. (To be Shared Shortly)
+
+#### Architectural Diagram
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
