@@ -2,6 +2,8 @@
 
 DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB and WebSocket API, to deliver a seamless communication experience. Focus here lies on the key System Design Principles.
 
+</br>
+
 ## Table of Contents
 
 1. [System Architecture and Components](#system-architecture-and-components)
@@ -9,10 +11,11 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 3. [Design Considerations](#design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
-6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture?)
+6. [How could I enhance my Current Architecture?](#how-could-i-enhance-my-current-architecture)
 7. [Contributions](#contributions)
 8. [Credit Attribution](#credit-attribution)
 
+</br>
 
 ## System Architecture And Components
 
@@ -20,17 +23,23 @@ The CF Template defines the part responsible for:-  handling WebSocket Connectio
 
 The WebSocket API (via the API Gateway) has been built using the AWS Console. (To be Shared Shortly)
 
+
 #### Architectural Diagram
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
-### API Gateway:-
-As stated above, the WebSocket API through API Gateway allows for bidirectional, persistent data connections between Clients and Serverless Backends.
+</br>
 
-### NoSQL Datastore:-
-**ConnectionsTable:** <br /> This is the DynamoDB table with primary Key named _connectionsId_.
+### API Gateway:-
+The WebSocket API allows for bidirectional, persistent data connections between Clients and Serverless Backends.
+</br>
+
+### DynamoDB:-
+**ConnectionsTable:** <br /> This is the registry storing Connection Metadata, primary Key:- _connectionsId_.
+</br>
 
 ### Lambdas:-
+
 **ConnectHandler:** <br /> Lambda function to handle WebSocket connections. Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
 
 **DisconnectHandler:** <br /> Handles WebSocket disconnections
@@ -40,6 +49,7 @@ Removes a connectionId from ConnectionsTable when a WebSocket connection is clos
 
 **DefaultHandler**: <br /> Provides information to a client when a WebSocket connection is established
 
+</br>
 
 ## The Workflow
 
@@ -55,6 +65,8 @@ Removes a connectionId from ConnectionsTable when a WebSocket connection is clos
 
 Scaling policies, and targets would help ensure that DynamoDB read & write capacities scale based on predefined metrics. The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
 
+</br>
+
 ## Design Considerations
 
 ### Availability 
@@ -67,6 +79,8 @@ Helps in controlling the maximum number of Concurrent Invocations of a Lambda Fu
 
 _**Implemented Throttling in API Gateway:**_ This helps in controlling the volume of API requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack. The APIs thus wouldn't be overwhelmed by too many requests.
 
+</br>
+
 ### Scalability 
 
 _**Configured Provisioned Concurrency for Lambda:**_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
@@ -75,6 +89,7 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
  _**Implemented Automatic Scaling for DynamoDB:**_ Dynamic Auto-Scaling through Targets and Policies for automatic, workload-responsive adjustments. Aids in resource-utilization & helps in cost optimisation
 
+</br>
 
 ### Security 
 
@@ -82,6 +97,7 @@ _**Lambda Authoriser - API Gateway Authorization:**_  (Snaps to be shared shortl
 
 _**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
+</br>
 
 ### Cost-Optimization 
 
@@ -89,6 +105,7 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 **_Auto-Scaling configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
 
+</br>
 
 ### Performance Optimization 
 
@@ -98,6 +115,7 @@ _**Choice of WebSocket APIs over REST APIs:**_ Web-Socket API optimises performa
 
 _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
 
+</br>
 
 ### How could I enhance my Current Architecture?
 
