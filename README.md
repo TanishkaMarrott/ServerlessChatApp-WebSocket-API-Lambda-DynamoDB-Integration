@@ -141,7 +141,9 @@ Use WAF on top of API gateway for enhancing the security of the current architec
 
 If we're looking at a geographically dispersed audience, and need to reduce connection times, I'd go in for the Edge-Optimised API Gateway. With Regional API Gateway, the requests traverse through the public internet. While with an Edge-optimised API gateway, the API requests travel through the CloudFront Points of Presence (PoP), before hitting the regional endpoint. This is a simpler, and an effective solution, with minimal costs & configuration. If I need more control over the routing logic/ global load balancing, and and more concrned about the DR Capabilities, Multiple Regional API Endpoints with Route 53 Latency-Based Routing would be my alternative here.
 
-I might alter the provisioned concurrency parameter here, based on observation and monitoring, since it might increase my standing costs. (Similarly for the DynamoDB Throughput) 
+Shifting our focus now to the NoSQL Table, DAX (DynamoDB Accelerator) wouldn't be something we'd be taking about here. Caching would be ideal in cases where we need to optimise read-performance / access to some frequent data. Introducing caching in a real-time application doesn't serve the purpose - we'd be introducing unnecessary complexities and costs, without achieving something fruitful. Features like Auto-Scaling, Provisioned Throughput, have already been incorporated here. 
+
+Also if I'm looking at a cost-efficient architecture , I would monitor and adjust Provisioned / Reserved Concurrency (Lambda) & DynamoDB throughput based on real-time demand - through Performance Insights / CW. This would help reduce unnecessary standing costs for over-provisioning.
 
 
 **What operational efficiencies can be introduced?**
