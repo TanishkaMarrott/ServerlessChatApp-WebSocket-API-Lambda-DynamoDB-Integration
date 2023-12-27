@@ -96,7 +96,8 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
 ### Security 
 
-_**Lambda Authoriser - API Gateway Authorization:**_  (Snaps to be shared shortly)
+_**Lambda Authoriser - API Gateway Authorization:**_  
+We implemented IAM authorization for the $connect method in the API using Lambda Authorizer within API Gateway for secure and controlled access.
 
 _**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
@@ -124,16 +125,24 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 **How can I make my current architecture resilent to regional failures?**
 
-Use of CDNs for geographically dispersed users, deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
+If high availability and failover capabilities are critical, the regional setup with Route 53 offers better control over traffic distribution during regional outages. Configure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), Cost-Redundancy Tradeoff
 
-Use Route 53 health checks to control DNS failover from an API Gateway API in a primary region to an API Gateway API in a secondary regionConfigure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), Cost-Redundancy Tradeoff.
+Deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
+
+
 
 **What other strategies can be implemented to make this architecture even more scalable?**
 Custom Auto-Scaling Logic using CloudWatch Alarms
 
 **How can I make this even more secure & withstand potential threats?**
+Use WAF on top of API gateway for enhancing the security of the current architecture. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
 
-**How might I further optimize costs within my architecture while maintaining performance?**
+**How can I achieve a better Performance Optimisation, while maintaining costs?**
+
+If we're looking at a geographically dispersed audience, and need to reduce connection times, I'd go in for the Edge-Optimised API Gateway. With Regional API Gateway, the requests traverse through the public internet. While with an Edge-optimised API gateway, the API requests travel through the CloudFront Points of Presence (PoP), before hitting the regional endpoint. This is a simpler, and an effective solution, with minimal costs & configuration. If I need more control over the routing logic/ global load balancing, and and more concrned about the DR Capabilities, Multiple Regional API Endpoints with Route 53 Latency-Based Routing would be my alternative here.
+
+I might alter the provisioned concurrency parameter here, based on observation and monitoring, since it might increase my standing costs. (Similarly for the DynamoDB Throughput) 
+
 
 **What operational efficiencies can be introduced?**
 
