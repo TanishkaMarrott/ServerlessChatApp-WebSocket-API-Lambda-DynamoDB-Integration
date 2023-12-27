@@ -19,7 +19,7 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
 ## System Architecture And Components
 
-The CF Template defines the part responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
+The CF Template defines the architecture responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
 
 The WebSocket API (via the API Gateway) has been built using the AWS Console. (To be Shared Shortly)
 
@@ -27,27 +27,30 @@ The WebSocket API (via the API Gateway) has been built using the AWS Console. (T
 #### Architectural Diagram
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
-
 </br>
 
-### API Gateway:-
-The WebSocket API allows for bidirectional, persistent data connections between Clients and Serverless Backends.
+### API Gateway 
+
+**_web-app-api:_** 
+This WebSocket API allows for bidirectional, persistent data connections between Clients and Serverless Backends.
 </br>
 
-### DynamoDB:-
-**ConnectionsTable:** <br /> This is the registry storing Connection Metadata, primary Key:- _connectionsId_.
+### DynamoDB 
+
+**_ConnectionsTable:_**  This registry stores the Connection Metadata.
 </br>
 
-### Lambdas:-
+### AWS Lambda 
 
-**ConnectHandler:** <br /> Lambda function to handle WebSocket connections. Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
+Four Lambdas have been used in the solution, Functions written below:-
 
-**DisconnectHandler:** <br /> Handles WebSocket disconnections
-Removes a connectionId from ConnectionsTable when a WebSocket connection is closed.
+**1- _ConnectHandler:_** Handles WebSocket connections, Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
 
-**SendMessageHandler:** <br /> Function used to send messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
+**2 -_DisconnectHandler:_** Removes a connectionId from ConnectionsTable when a WebSocket connection is closed.
 
-**DefaultHandler**: <br /> Provides information to a client when a WebSocket connection is established
+**3 -_SendMessageHandler:_** Sends messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
+
+**4 -_DefaultHandler_**: Provides information to a client when a WebSocket connection is established
 
 </br>
 
