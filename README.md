@@ -1,6 +1,6 @@
 # DynamoWave Chat - A Serverless Real-time Chat Application
 
-DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on AWS Lambda, DynamoDB and WebSocket API, to deliver a seamless communication experience. Focus here lies on the key System Design Principles.
+DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on top of AWS Lambda, DynamoDB and WebSocket API, to deliver a seamless communication experience. The emphasis here is on the optimising System Design Considerations.
 
 </br>
 
@@ -32,12 +32,12 @@ The WebSocket API (via the API Gateway) has been built using the AWS Console. (T
 ### API Gateway 
 
 **_web-app-api:_** 
-This WebSocket API allows for bidirectional, persistent data connections between Clients and Serverless Backends.
+The WebSocket APi via the API Gateway. Helps establish bidirectional, persistent data connections. This allows for a seamless exchange of messages and data between Clients and Serverless Backends.
 </br>
 
 ### DynamoDB 
 
-**_ConnectionsTable:_**  This registry stores the Connection Metadata.
+**_ConnectionsTable:_**  The Connection registry. This database table serves as a repository for storing essential metadata related to connections. It includes information such as connection identifiers, facilitating efficient tracking and management of connections within the system.
 </br>
 
 ### AWS Lambda 
@@ -96,8 +96,8 @@ _**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throu
 
 ### Security 
 
-_**Lambda Authoriser - API Gateway Authorization:**_  
-We implemented IAM authorization for the $connect method in the API using Lambda Authorizer within API Gateway for secure and controlled access.
+_**Lambda Authorizer - API Gateway Authorization:**_
+IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
 _**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
