@@ -150,8 +150,6 @@ A consistent high-volume read/write traffic would be a signal for me to explore 
 I would monitor and adjust Provisioned / Reserved Concurrency (Lambda) & DynamoDB throughput based on real-time demand - through Performance Insights / CW. This would help reduce unnecessary standing costs for over-provisioning.
 
 
-**What operational efficiencies can be introduced?**
-
 
 ### Contributions 
 Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
