@@ -1,6 +1,11 @@
-# DynamoWave Chat - A Serverless Real-time Chat Application
+# DynamoWave Chat - A serverless, real-time chat Application
 
-DynamoWave Chat is a modern and scalable serverless real-time chat application. It is built on top of AWS Lambda, DynamoDB and WebSocket API, to deliver a seamless communication experience. The emphasis here is on the optimising System Design Considerations.
+DynamoWave Chat is a modern and scalable serverless real-time chat application. 
+
+It is built on top of AWS Lambda, DynamoDB & WebSocket API to deliver a seamless communication experience.        
+
+➡️ **Focus:** Enhancing the application to ensure high-performance delivery.
+
 
 </br>
 
@@ -21,52 +26,58 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
 The CF Template defines the architecture responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
 
-The WebSocket API (via the API Gateway) has been built using the AWS Console. (To be Shared Shortly)
-
 
 #### Architectural Diagram
 
 <img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
-</br>
-
-### API Gateway 
-
-**_web-app-api:_** 
-The WebSocket APi via the API Gateway. Helps establish bidirectional, persistent data connections. This allows for a seamless exchange of messages and data between Clients and Serverless Backends.
-</br>
-
-### DynamoDB 
-
-**_ConnectionsTable:_**  The Connection registry. This database table serves as a repository for storing essential metadata related to connections. It includes information such as connection identifiers, facilitating efficient tracking and management of connections within the system.
-</br>
-
-### AWS Lambda 
-
-Four Lambdas have been used in the solution, Functions written below:-
-
-**1- _ConnectHandler:_** Handles WebSocket connections, Adds a new connectionId to ConnectionsTable when a WebSocket connection is established
-
-**2 -_DisconnectHandler:_** Removes a connectionId from ConnectionsTable when a WebSocket connection is closed.
-
-**3 -_SendMessageHandler:_** Sends messages to connected clients. It retrieves all connectionIds from ConnectionsTable, and sends a message to each connected client using ApiGatewayManagementApi.
-
-**4 -_DefaultHandler_**: Provides information to a client when a WebSocket connection is established
 
 </br>
 
-## The Workflow
+**API Gateway**  
+**`Web-app-api:`**  
+We use the WebSocket API via the API Gateway to establish bidirectional, persistent data connections. This setup enables seamless message and data exchanges between clients and serverless backends.
 
-**Step 1**- A WebSocket connection is established, triggering the _ConnectHandler_ Lambda function.
+**DynamoDB**  
+**`ConnectionsTable:`**  
+This is our connection registry. It stores essential metadata such as connection identifiers, allowing us to track and manage connections efficiently.
 
-**Step 2**- The _ConnectHandler_ Lambda function adds the _connectionId_ to the _ConnectionsTable_ in DynamoDB.
+**AWS Lambda**  
+We've employed four Lambda functions:
 
-**Step 3**- If a WebSocket connection is closed, the _DisconnectHandler_ Lambda function removes the _connectionId_ from the _ConnectionsTable_.
+**1. `ConnectHandler` →**  
+On establishing a WebSocket connection, this function adds the new connectionId to the ConnectionsTable.
 
-**Step 4**- The _SendMessageHandler_ Lambda function can be invoked to send messages to all connected clients by iterating through _connectionIds_ in the _ConnectionsTable_.
+**2. `DisconnectHandler` →**  
+This function removes a connectionId from the ConnectionsTable when a WebSocket connection is closed.
 
-**Step 5**- The _DefaultHandler_ Lambda function provides information to a client when a WebSocket connection is established.
+**3. `SendMessageHandler` →**  
+It retrieves all connectionIds from the ConnectionsTable and sends messages to each connected client using the ApiGatewayManagementApi.
 
-Scaling policies, and targets would help ensure that DynamoDB read & write capacities scale based on predefined metrics. The IAM roles and policies control access to DynamoDB and API Gateway actions for the Lambda functions.
+**4. `DefaultHandler` →**  
+This function provides information to a client upon establishing a WebSocket connection.
+
+</br>
+
+
+## **The Workflow**
+
+**Step 1 →**  
+A WebSocket connection is established automatically, triggering the `ConnectHandler` Lambda function.
+
+**Step 2 →**  
+`ConnectHandler` then inserts the `connectionId` to the `ConnectionsTable` in DynamoDB.
+
+**Step 3 →**  
+If a WebSocket connection is closed, `DisconnectHandler` automatically removes the `connectionId` from the `ConnectionsTable`.
+
+**Step 4 →**  
+`SendMessageHandler` can be invoked to send messages to all connected clients by iterating through `connectionId`s in the `ConnectionsTable`.
+
+**Step 5 →**  
+`DefaultHandler` provides information to a client upon the establishment of a WebSocket connection.
+
+**Scaling and Security →**  
+We've used scaling policies and targets to ensure DynamoDB read & write capacities adjust according to predefined metrics. Access to DynamoDB and API Gateway is controlled through IAM roles and policies for the Lambda functions.
 
 </br>
 
