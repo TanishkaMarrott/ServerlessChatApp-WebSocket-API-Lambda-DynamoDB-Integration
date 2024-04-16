@@ -2,7 +2,7 @@
 
 DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
-It is built on top of AWS Lambda, DynamoDB & WebSocket API to deliver a seamless communication experience.        
+It is built on top of AWS Services - Lambda, DynamoDB & API Gateway
 
 ➡️ **Focus:** Enhancing the application to ensure high-performance delivery.
 
@@ -23,11 +23,6 @@ It is built on top of AWS Lambda, DynamoDB & WebSocket API to deliver a seamless
 </br>
 
 ## System Architecture & Components
-
-The CF Template defines the architecture responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
-
-
-## Architectural Diagram
 
 <img width="927" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
@@ -54,58 +49,64 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ## **How does the workflow look like?**
 
-         Establish WebSocket Connection     
+         Establishes the websocket connection     
+         
                ↓     
+               
          Triggers `ConnectHandler`     
+         
                ↓    
-         `ConnectHandler` inserts `connectionId` into `ConnectionsTable`     
+               
+         `ConnectHandler` inserts `connectionId` into `ConnectionsTable`    
+         
                ↓    
+               
          WebSocket connection closes       
+         
                ↓    
+               
          `DisconnectHandler` automatically removes `connectionId` from `ConnectionsTable`    
+         
                ↓    
-         `SendMessageHandler` can be invoked to send messages to all connected clients
-         by iterating through `connectionIds`    
+               
+         `SendMessageHandler` iterates through `connectionIds` and send msgs to connected clients    
+         
                ↓    
-         `DefaultHandler` provides information to a client upon the establishment of a WebSocket connection    
-
-**Scaling and Security →**  
-We've used scaling policies and targets to ensure DynamoDB read & write capacities adjust according to predefined metrics. Access to DynamoDB and API Gateway is controlled through IAM roles and policies for the Lambda functions.
+               
+         `DefaultHandler` --> notifies the client on establishmenet of the connection    
+         
 
 </br>
 
 ## How did we improvise on the design considerations?
 
-### Availability 
+### The availability aspect
 
-1 - _**Multi-AZ Deployments (Built-in) :**_
-The core services we've used here are implicitly resilent to Zonal Failures. 👍
+1 - The services we've used here are **Multi-AZ - resilent to Zonal Failures.** 👍
 
-2 - _**Set Reserved Concurrency in Lambda:**_ 
-Helps us in controlling the maximum number of Concurrent Invocations of a Lambda Function. 
+2 - **We've set some reserved concurrency in lambda.** --> Helps us in controlling the maximum number of concurrent invocations 
 
 > We won't lose requests due to other functions consuming all of the available concurrency.
 
-3 - _**Implemented Throttling in API Gateway:**_ We had to control the volume of API requests hitting the gateway --> Mitigating a DDoS Attack. ➡️ The APIs thus wouldn't be overwhelmed by too many requests.
+3 - **Implemented Throttling in API Gateway.** We had to control the volume of API requests hitting the gateway --> Mitigating a DDoS Attack. ➡️ The APIs thus wouldn't be overwhelmed by too many requests.
 
 </br>
 
 ### Scalability 
 
-_**Configured Provisioned Concurrency for Lambda:**_    
+1 - **We've configured provisioned concurrency for Lambda**    
+_Purpose?_                                             
+**Reduces cold start latency 🟰 Consistent & predictable performance** 
 
-_**Purpose?**_
-Reduces cold start latency, ensuring consistent & predictable performance. 
+> **Pre-warming a set of lambda instances** helps us in improvising responsiveness & Scalability during traffic spikes 👍
 
-> Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+2- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent and predictable read/write performance.
 
-_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs for a consistent and predictable read/write performance.
-
- _**Implemented Automatic Scaling for DynamoDB:**_ Dynamic Auto-Scaling through Targets and Policies for automatic, workload-responsive adjustments ▶️ Aids in resource-utilization & helps in cost optimisation
+3-  We wanted things to scale dynamically such thet we're workload-responsive always, **hence we implemented dynamic auto-scaling for DynamoDB through targets and policies** ▶️ **Cost optimisation**
 
 </br>
 
-### Security 
+## Security 
 
 _**Lambda Authorizer - API Gateway Authorization:**_
 IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
