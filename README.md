@@ -49,32 +49,19 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ## **How does the workflow look like?**
 
-         Establishes the websocket connection     
-         
-               ↓     
-               
-         Triggers `ConnectHandler`     
-         
-               ↓    
-               
-         `ConnectHandler` inserts `connectionId` into `ConnectionsTable`    
-         
-               ↓    
-               
-         WebSocket connection closes       
-         
-               ↓    
-               
-         `DisconnectHandler` automatically removes `connectionId` from `ConnectionsTable`    
-         
-               ↓    
-               
-         `SendMessageHandler` iterates through `connectionIds` and send msgs to connected clients    
-         
-               ↓    
-               
-         `DefaultHandler` --> notifies the client on establishmenet of the connection    
-         
+                  Establishes the websocket connection
+                        ⬇️
+                  Triggers ConnectHandler
+                        ⬇️
+                  ConnectHandler inserts connectionId into ConnectionsTable
+                        ⬇️
+                  WebSocket connection closes
+                        ⬇️
+                  DisconnectHandler automatically removes connectionId from ConnectionsTable
+                        ⬇️
+                  SendMessageHandler iterates through connectionIds and sends messages to connected clients
+                        ⬇️
+                  DefaultHandler --> notifies the client on establishment of the connection
 
 </br>
 
