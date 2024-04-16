@@ -37,12 +37,12 @@ To provide clarity, we'll define the purpose of each component in our architectu
 | Service        | Identifier we're using     | Purpose - Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
 |||                               |
-| _API Gateway_  | `Web-socket-api`      | ➡️ Real-time communication in our application|                     
-| _DynamoDB_     | `ConnectionsTable`    | **_Purpose?_** Acts as a connection registry to efficiently track connections  |
-| _AWS Lambda_   | `ConnectHandler`      | --> **_Every new connection must be recorded --> Operational Integrity_** |
-|                | `DisconnectHandler`   | Updates the connection table by **removing inactive connections** |
-|                | `SendMessageHandler`  | --> Needed for reliable communication across all active connections|
-|                | `DefaultHandler`      | Helps notify the client at connection setup   |
+| _API Gateway_  | _`Web-socket-api`_      | ➡️ Real-time communication in our application|                     
+| _DynamoDB_     | _`ConnectionsTable`_    | Purpose:- Our connection registry to efficiently track connections  |
+| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> Helps us ensure operational Integrity |
+|                | _`DisconnectHandler`_   | Updates the connection table by removing inactive connections |
+|                | _`SendMessageHandler`_  | --> Needed for reliable communication across all active connections|
+|                | _`DefaultHandler`_      | Helps notify the client when we're through with establishing the connection   |
 
 
 </br>
@@ -69,23 +69,18 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### The availability aspect
 
-➡️ The services we've used here are **Multi-AZ - resilent to Zonal Failures.** 
-
+➡️ The services we've used here are **Multi-AZ - resilent to Zonal Failures.**         
 Multi-AZ deployments 👉 Resilience and reliability of the application 
 
-</br>
 
 ➡️ **I've set some reserved concurrency for the important lambdas.** --> For service continuity 
 
-</br>
-
 > Wanted to ensure that client requests aren't lost due to other lambda functions consuming all available capacity 👍
 
-</br>
-
-➡️ **Throttling controls in API Gateway.** We've implemented request throttling to manage the rate of incoming requests effectively, protecting backend services from being overwhelmed by high volumes of traffic. 
-Purpose? We wanted to safeguard 
-➡️ By controlling the request flow, we prevent the API from becoming a bottleneck, thereby maintaining availability and consistent performance across the application.
+➡️ **Throttling controls in API Gateway.** We've implemented request throttling to manage the rate of incoming requests.
+Purpose?                 
+--> We wanted something that could help sustain backpressure scenarios, - prevents my system from being overwhelmed.      
+--> Helps us safeguard against a DDoS Attack  --> This means that my API will remain responsive to legit users.
 
 </br>
 
