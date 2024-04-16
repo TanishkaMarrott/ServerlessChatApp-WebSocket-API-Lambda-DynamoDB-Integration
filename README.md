@@ -69,13 +69,23 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### The availability aspect
 
-1 - The services we've used here are **Multi-AZ - resilent to Zonal Failures.** 👍
+➡️ The services we've used here are **Multi-AZ - resilent to Zonal Failures.** 
 
-2 - **We've set some reserved concurrency in lambda.** --> Helps us in controlling the maximum number of concurrent invocations 
+Multi-AZ deployments 👉 Resilience and reliability of the application 
 
-> We won't lose requests due to other functions consuming all of the available concurrency.
+</br>
 
-3 - **Implemented Throttling in API Gateway.** We had to control the volume of API requests hitting the gateway --> Mitigating a DDoS Attack. ➡️ The APIs thus wouldn't be overwhelmed by too many requests.
+➡️ **I've set some reserved concurrency for the important lambdas.** --> For service continuity 
+
+</br>
+
+> Wanted to ensure that client requests aren't lost due to other lambda functions consuming all available capacity 👍
+
+</br>
+
+➡️ **Throttling controls in API Gateway.** We've implemented request throttling to manage the rate of incoming requests effectively, protecting backend services from being overwhelmed by high volumes of traffic. 
+Purpose? We wanted to safeguard 
+➡️ By controlling the request flow, we prevent the API from becoming a bottleneck, thereby maintaining availability and consistent performance across the application.
 
 </br>
 
