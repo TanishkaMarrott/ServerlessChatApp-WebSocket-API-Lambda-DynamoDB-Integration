@@ -1,5 +1,4 @@
 Resources:
-  #Connections Table
   ConnectionsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -9,17 +8,16 @@ Resources:
       AttributeDefinitions:
         - AttributeName: connectionId
           AttributeType: S
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
     UpdateReplacePolicy: Delete
     DeletionPolicy: Delete
-  #Auto Scaling Role
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Action: sts:AssumeRole
             Effect: Allow
@@ -28,24 +26,22 @@ Resources:
       Policies:
         - PolicyName: DynamoDBAutoScalingPolicy
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: '2012-10-17'
             Statement:
               - Action:
                   - dynamodb:DescribeTable
                   - dynamodb:UpdateTable
                 Effect: Allow
-                Resource: "*"
-  #Write Auto Scaling Target
+                Resource: !GetAtt ConnectionsTable.Arn
   WriteAutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
       MaxCapacity: 10
       MinCapacity: 5
-      ResourceId: !Sub "table/${ConnectionsTable}"
-      RoleARN: !GetAtt [AutoScalingRole, Arn]
-      ScalableDimension: "dynamodb:table:WriteCapacityUnits"
-      ServiceNamespace: "dynamodb"
-  #Write Auto Scaling Policy
+      ResourceId: !Sub table/${ConnectionsTable}
+      RoleARN: !GetAtt AutoScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
   WriteAutoScalingPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
@@ -58,9 +54,8 @@ Resources:
         TargetValue: 70
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
-  #Read Auto Scaling Policy
   ReadAutoScalingPolicy:
-    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
       PolicyName: ReadAutoScalingPolicy
       PolicyType: TargetTrackingScaling
@@ -70,39 +65,37 @@ Resources:
           PredefinedMetricType: DynamoDBReadCapacityUtilization
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
-        TargetValue: 70.0
-  #Read Auto Scaling Target
+        TargetValue: 70
   ReadScalingTarget:
-    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
       MaxCapacity: 10
       MinCapacity: 5
-      ResourceId: !Sub "table/${ConnectionsTable}"
+      ResourceId: !Sub table/${ConnectionsTable}
       RoleARN: !GetAtt AutoScalingRole.Arn
-      ScalableDimension: "dynamodb:table:ReadCapacityUnits"
-      ServiceNamespace: "dynamodb"
-  #Connect Lambda Function
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
   ConnectHandlerServiceRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #Connect Handler Service Role
+        - !Join
+          - ''
+          - - 'arn:'
+            - !Ref AWS::Partition
+            - ':iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
   ConnectHandlerServiceRoleDefaultPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Action:
               - dynamodb:BatchWriteItem
@@ -112,15 +105,11 @@ Resources:
               - dynamodb:DescribeTable
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - ConnectionsTable
-                  - Arn
-              - Ref: AWS::NoValue
-        Version: "2012-10-17"
+              - !GetAtt ConnectionsTable.Arn
+              - !Ref AWS::NoValue
       PolicyName: ConnectHandlerServiceRoleDefaultPolicy
       Roles:
-        - Ref: ConnectHandlerServiceRole
-  #Connect Handler Code
+        - !Ref ConnectHandlerServiceRole
   ConnectHandler:
     Type: AWS::Lambda::Function
     Properties:
@@ -147,56 +136,48 @@ Resources:
                     statusCode: 200,
                   };
                 };
-      Role:
-        Fn::GetAtt:
-          - ConnectHandlerServiceRole
-          - Arn
+      Role: !GetAtt ConnectHandlerServiceRole.Arn
       Environment:
         Variables:
-          table:
-            Ref: ConnectionsTable
+          table: !Ref ConnectionsTable
       Handler: index.handler
       Runtime: nodejs16.x
     DependsOn:
       - ConnectHandlerServiceRoleDefaultPolicy
       - ConnectHandlerServiceRole
-
   ConnectHandlerVersion:
     Type: AWS::Lambda::Version
     Properties:
       FunctionName: !Ref ConnectHandler
-
   ConnectHandlerAlias:
     Type: AWS::Lambda::Alias
     Properties:
       FunctionName: !Ref ConnectHandler
       FunctionVersion: !GetAtt ConnectHandlerVersion.Version
-      Name: "Prod"
+      Name: Prod
       ProvisionedConcurrencyConfig:
         ProvisionedConcurrentExecutions: 5
-
-  #Disconnect Service Role
-  DisconnectHandlerServiceRole:
+    DisconnectHandlerServiceRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #Disconnect Service Role Policy
+        - !Join
+          - ''
+          - - 'arn:'
+            - !Ref AWS::Partition
+            - ':iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
   DisconnectHandlerServiceRoleDefaultPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Action:
               - dynamodb:BatchWriteItem
@@ -206,15 +187,11 @@ Resources:
               - dynamodb:DescribeTable
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - ConnectionsTable
-                  - Arn
-              - Ref: AWS::NoValue
-        Version: "2012-10-17"
+              - !GetAtt ConnectionsTable.Arn  # Restrict access to specific table only
+              - !Ref AWS::NoValue
       PolicyName: DisconnectHandlerServiceRoleDefaultPolicy
       Roles:
-        - Ref: DisconnectHandlerServiceRole
-  #Disconnect Lambda Code
+        - !Ref DisconnectHandlerServiceRole
   DisconnectHandler:
     Type: AWS::Lambda::Function
     Properties:
@@ -222,7 +199,6 @@ Resources:
         ZipFile: |-
           const AWS = require('aws-sdk');
                 const ddb = new AWS.DynamoDB.DocumentClient();
-                
                 exports.handler = async function (event, context) {
                   await ddb
                     .delete({
@@ -236,35 +212,27 @@ Resources:
                     statusCode: 200,
                   };
                 };
-      Role:
-        Fn::GetAtt:
-          - DisconnectHandlerServiceRole
-          - Arn
+      Role: !GetAtt DisconnectHandlerServiceRole.Arn
       Environment:
         Variables:
-          table:
-            Ref: ConnectionsTable
+          table: !Ref ConnectionsTable
       Handler: index.handler
       Runtime: nodejs16.x
     DependsOn:
       - DisconnectHandlerServiceRoleDefaultPolicy
       - DisconnectHandlerServiceRole
-
   DisconnectHandlerVersion:
     Type: AWS::Lambda::Version
     Properties:
       FunctionName: !Ref DisconnectHandler
-
   DisconnectHandlerAlias:
     Type: AWS::Lambda::Alias
     Properties:
       FunctionName: !Ref DisconnectHandler
       FunctionVersion: !GetAtt DisconnectHandlerVersion.Version
-      Name: "Prod"
+      Name: Prod
       ProvisionedConcurrencyConfig:
         ProvisionedConcurrentExecutions: 5
-
-  #Send Message Handler Service Role
   SendMessageHandlerServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -274,18 +242,18 @@ Resources:
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
+        Version: '2012-10-17'
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #Send Message Handler Service Role Policy
+        - !Join
+          - ''
+          - - 'arn:'
+            - !Ref AWS::Partition
+            - ':iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
   SendMessageHandlerServiceRoleDefaultPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Action:
               - dynamodb:BatchGetItem
@@ -298,15 +266,11 @@ Resources:
               - dynamodb:DescribeTable
             Effect: Allow
             Resource:
-              - Fn::GetAtt:
-                  - ConnectionsTable
-                  - Arn
-              - Ref: AWS::NoValue
-        Version: "2012-10-17"
+              - !GetAtt ConnectionsTable.Arn  # Specify exact resource for better security
+              - !Ref AWS::NoValue
       PolicyName: SendMessageHandlerServiceRoleDefaultPolicy
       Roles:
-        - Ref: SendMessageHandlerServiceRole
-  #Send Message Handler Code
+        - !Ref SendMessageHandlerServiceRole
   SendMessageHandler:
     Type: AWS::Lambda::Function
     Properties:
@@ -314,7 +278,6 @@ Resources:
         ZipFile: |-
           const AWS = require('aws-sdk');
                 const ddb = new AWS.DynamoDB.DocumentClient();
-                
                 exports.handler = async function (event, context) {
                   let connections;
                   try {
@@ -329,9 +292,7 @@ Resources:
                     endpoint:
                       event.requestContext.domainName + '/' + event.requestContext.stage,
                   });
-                
                   const message = JSON.parse(event.body).message;
-                
                   const sendMessages = connections.Items.map(async ({ connectionId }) => {
                     if (connectionId !== event.requestContext.connectionId) {
                       try {
@@ -343,7 +304,6 @@ Resources:
                       }
                     }
                   });
-                
                   try {
                     await Promise.all(sendMessages);
                   } catch (e) {
@@ -352,37 +312,29 @@ Resources:
                       statusCode: 500,
                     };
                   }
-                
                   return { statusCode: 200 };
                 };
-      Role:
-        Fn::GetAtt:
-          - SendMessageHandlerServiceRole
-          - Arn
+      Role: !GetAtt SendMessageHandlerServiceRole.Arn
       Environment:
         Variables:
-          table:
-            Ref: ConnectionsTable
+          table: !Ref ConnectionsTable
       Handler: index.handler
       Runtime: nodejs16.x
     DependsOn:
       - SendMessageHandlerServiceRoleDefaultPolicy
       - SendMessageHandlerServiceRole
-
   SendMessageHandlerVersion:
     Type: AWS::Lambda::Version
     Properties:
       FunctionName: !Ref SendMessageHandler
-
   SendMessageHandlerAlias:
     Type: AWS::Lambda::Alias
     Properties:
       FunctionName: !Ref SendMessageHandler
       FunctionVersion: !GetAtt SendMessageHandlerVersion.Version
-      Name: "Prod"
+      Name: Prod
       ProvisionedConcurrencyConfig:
         ProvisionedConcurrentExecutions: 5
-  #Default Handler Service Role
   DefaultHandlerServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -392,14 +344,13 @@ Resources:
             Effect: Allow
             Principal:
               Service: lambda.amazonaws.com
-        Version: "2012-10-17"
+        Version: '2012-10-17'
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #Default Handler Service Role Default Policy
+        - !Join
+          - ''
+          - - 'arn:'
+            - !Ref AWS::Partition
+            - ':iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
   DefaultHandlerServiceRoleDefaultPolicy:
     Type: AWS::IAM::Policy
     Properties:
@@ -408,80 +359,66 @@ Resources:
           - Action: execute-api:ManageConnections
             Effect: Allow
             Resource:
-              Fn::Join:
-                - ""
-                - - "arn:aws:execute-api:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - ":"
-                  - "*/*/POST/@connections/*"
-          - Action: execute-api:ManageConnections
-            Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:aws:execute-api:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - ":"
-                  - "*/*/GET/@connections/*"
-        Version: "2012-10-17"
+              - !Join
+                - ''
+                - - 'arn:aws:execute-api:'
+                  - !Ref AWS::Region
+                  - ':'
+                  - !Ref AWS::AccountId
+                  - ':'
+                  - '*/*/POST/@connections/*'
+              - !Join
+                - ''
+                - - 'arn:aws:execute-api:'
+                  - !Ref AWS::Region
+                  - ':'
+                  - !Ref AWS::AccountId
+                  - ':'
+                  - '*/*/GET/@connections/*'
+        Version: '2012-10-17'
       PolicyName: DefaultHandlerServiceRoleDefaultPolicy
       Roles:
-        - Ref: DefaultHandlerServiceRole
-  #Default Handler Code
+        - !Ref DefaultHandlerServiceRole
   DefaultHandler:
     Type: AWS::Lambda::Function
     Properties:
       Code:
         ZipFile: |-
           const AWS = require('aws-sdk');
-
-                exports.handler = async function (event, context) {
-                  let connectionInfo;
-                  let connectionId = event.requestContext.connectionId;
-                
-                  const callbackAPI = new AWS.ApiGatewayManagementApi({
-                    apiVersion: '2018-11-29',
-                    endpoint:
-                      event.requestContext.domainName + '/' + event.requestContext.stage,
-                  });
-                
-                  try {
-                    connectionInfo = await callbackAPI
-                      .getConnection({ ConnectionId: event.requestContext.connectionId })
-                      .promise();
-                  } catch (e) {
-                    console.log(e);
-                  }
-                
-                  connectionInfo.connectionID = connectionId;
-                
-                  await callbackAPI
-                    .postToConnection({
-                      ConnectionId: event.requestContext.connectionId,
-                      Data:
-                        'Use the sendmessage route to send a message. Your info:' +
-                        JSON.stringify(connectionInfo),
-                    })
-                    .promise();
-                
-                  return {
-                    statusCode: 200,
-                  };
-                };
-      Role:
-        Fn::GetAtt:
-          - DefaultHandlerServiceRole
-          - Arn
+          exports.handler = async function (event, context) {
+            let connectionInfo;
+            let connectionId = event.requestContext.connectionId;
+            const callbackAPI = new AWS.ApiGatewayManagementApi({
+              apiVersion: '2018-11-29',
+              endpoint:
+                event.requestContext.domainName + '/' + event.requestContext.stage,
+            });
+            try {
+              connectionInfo = await callbackAPI
+                .getConnection({ ConnectionId: event.requestContext.connectionId })
+                .promise();
+            } catch (e) {
+              console.log(e);
+            }
+            connectionInfo.connectionID = connectionId;
+            await callbackAPI
+              .postToConnection({
+                ConnectionId: event.requestContext.connectionId,
+                Data:
+                  'Use the sendmessage route to send a message. Your info:' +
+                  JSON.stringify(connectionInfo),
+              })
+              .promise();
+            return {
+              statusCode: 200,
+            };
+          };
+      Role: !GetAtt DefaultHandlerServiceRole.Arn
       Handler: index.handler
       Runtime: nodejs16.x
     DependsOn:
       - DefaultHandlerServiceRoleDefaultPolicy
       - DefaultHandlerServiceRole
-  #Manage Connections Policy 
   manageConnections:
     Type: AWS::IAM::Policy
     Properties:
@@ -489,18 +426,15 @@ Resources:
         Statement:
           - Action: execute-api:ManageConnections
             Effect: Allow
-            Resource:
-              Fn::Join:
-                - ""
-                - - "arn:aws:execute-api:"
-                  - Ref: AWS::Region
-                  - ":"
-                  - Ref: AWS::AccountId
-                  - ":"
-                  - "*/*/POST/@connections/*"
-        Version: "2012-10-17"
+            Resource: !Join
+              - ''
+              - - 'arn:aws:execute-api:'
+                - !Ref AWS::Region
+                - ':'
+                - !Ref AWS::AccountId
+                - ':'
+                - '*/*/POST/@connections/*'
+        Version: '2012-10-17'
       PolicyName: manageConnections
       Roles:
-        - Ref: SendMessageHandlerServiceRole
-
-
+        - !Ref SendMessageHandlerServiceRole
