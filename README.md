@@ -82,10 +82,15 @@ To provide clarity, we'll define the purpose of each component in our architectu
 ### Scalability 
 
 1 - **We've configured provisioned concurrency for Lambda**    
+
 _Purpose?_                                             
 **Reduces cold start latency 🟰 Consistent & predictable performance** 
 
+</br>
+
 > **Pre-warming a set of lambda instances** helps us in improvising responsiveness & Scalability during traffic spikes 👍
+
+</br>
 
 2- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent and predictable read/write performance.
 
