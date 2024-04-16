@@ -11,9 +11,9 @@ It is built on top of AWS Lambda, DynamoDB & WebSocket API to deliver a seamless
 
 ## Table of Contents
 
-1. [System Architecture and Components](#system-architecture-and-components)
+1. [System Architecture & Components](#system-architecture--components)
 2. [The Workflow](#the-workflow)
-3. [Design Considerations](#design-considerations)
+3. [How did we improvise on the design considerations?](#how-did-we-improvise-on-the-design-considerations)
 4. [Setup](#setup)
 5. [Usage](#usage)
 6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
@@ -22,86 +22,86 @@ It is built on top of AWS Lambda, DynamoDB & WebSocket API to deliver a seamless
 
 </br>
 
-## System Architecture And Components
+## System Architecture & Components
 
 The CF Template defines the architecture responsible for:-  handling WebSocket Connections, managing them in a DynamoDB table, & enabling communication between connected clients using Lambda.
 
 
-#### Architectural Diagram
+## Architectural Diagram
 
-<img width="416" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
-
-</br>
-
-**API Gateway**  
-**`Web-app-api:`**  
-We use the WebSocket API via the API Gateway to establish bidirectional, persistent data connections. This setup enables seamless message and data exchanges between clients and serverless backends.
-
-**DynamoDB**  
-**`ConnectionsTable:`**  
-This is our connection registry. It stores essential metadata such as connection identifiers, allowing us to track and manage connections efficiently.
-
-**AWS Lambda**  
-We've employed four Lambda functions:
-
-**1. `ConnectHandler` →**  
-On establishing a WebSocket connection, this function adds the new connectionId to the ConnectionsTable.
-
-**2. `DisconnectHandler` →**  
-This function removes a connectionId from the ConnectionsTable when a WebSocket connection is closed.
-
-**3. `SendMessageHandler` →**  
-It retrieves all connectionIds from the ConnectionsTable and sends messages to each connected client using the ApiGatewayManagementApi.
-
-**4. `DefaultHandler` →**  
-This function provides information to a client upon establishing a WebSocket connection.
+<img width="927" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
 
 </br>
 
+### Services we've used, with their purpose
 
-## **The Workflow**
+To provide clarity, we'll define the purpose of each component in our architecture:-
 
-**Step 1 →**  
-A WebSocket connection is established automatically, triggering the `ConnectHandler` Lambda function.
+</br>
 
-**Step 2 →**  
-`ConnectHandler` then inserts the `connectionId` to the `ConnectionsTable` in DynamoDB.
+| Service        | Identifier we're using     | Purpose - Why we've used?                       |
+|--------------------|---------------------|-------------------------------|
+|||                               |
+| _API Gateway_  | `Web-socket-api`      | ➡️ Real-time communication in our application|                     
+| _DynamoDB_     | `ConnectionsTable`    | **_Purpose?_** Acts as a connection registry to efficiently track connections  |
+| _AWS Lambda_   | `ConnectHandler`      | --> **_Every new connection must be recorded --> Operational Integrity_** |
+|                | `DisconnectHandler`   | Updates the connection table by **removing inactive connections** |
+|                | `SendMessageHandler`  | --> Needed for reliable communication across all active connections|
+|                | `DefaultHandler`      | Helps notify the client at connection setup   |
 
-**Step 3 →**  
-If a WebSocket connection is closed, `DisconnectHandler` automatically removes the `connectionId` from the `ConnectionsTable`.
 
-**Step 4 →**  
-`SendMessageHandler` can be invoked to send messages to all connected clients by iterating through `connectionId`s in the `ConnectionsTable`.
+</br>
 
-**Step 5 →**  
-`DefaultHandler` provides information to a client upon the establishment of a WebSocket connection.
+## **How does the workflow look like?**
+
+         Establish WebSocket Connection     
+               ↓     
+         Triggers `ConnectHandler`     
+               ↓    
+         `ConnectHandler` inserts `connectionId` into `ConnectionsTable`     
+               ↓    
+         WebSocket connection closes       
+               ↓    
+         `DisconnectHandler` automatically removes `connectionId` from `ConnectionsTable`    
+               ↓    
+         `SendMessageHandler` can be invoked to send messages to all connected clients
+         by iterating through `connectionIds`    
+               ↓    
+         `DefaultHandler` provides information to a client upon the establishment of a WebSocket connection    
 
 **Scaling and Security →**  
 We've used scaling policies and targets to ensure DynamoDB read & write capacities adjust according to predefined metrics. Access to DynamoDB and API Gateway is controlled through IAM roles and policies for the Lambda functions.
 
 </br>
 
-## Design Considerations
+## How did we improvise on the design considerations?
 
 ### Availability 
 
-_**Multi-AZ Deployments (Built-in) :**_
-The core services used here are implicitly resilent to Zonal Failures.
+1 - _**Multi-AZ Deployments (Built-in) :**_
+The core services we've used here are implicitly resilent to Zonal Failures. 👍
 
-_**Set Reserved Concurrency in Lambda:**_ 
-Helps in controlling the maximum number of Concurrent Invocations of a Lambda Function. We won't lose requests due to other functions consuming all of the available concurrency.
+2 - _**Set Reserved Concurrency in Lambda:**_ 
+Helps us in controlling the maximum number of Concurrent Invocations of a Lambda Function. 
 
-_**Implemented Throttling in API Gateway:**_ This helps in controlling the volume of API requests hitting the API Gateway, preventing abuse & mitigating a DDoS Attack. The APIs thus wouldn't be overwhelmed by too many requests.
+> We won't lose requests due to other functions consuming all of the available concurrency.
+
+3 - _**Implemented Throttling in API Gateway:**_ We had to control the volume of API requests hitting the gateway --> Mitigating a DDoS Attack. ➡️ The APIs thus wouldn't be overwhelmed by too many requests.
 
 </br>
 
 ### Scalability 
 
-_**Configured Provisioned Concurrency for Lambda:**_ Reduces cold start latency, ensuring consistent & predictable performance. Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+_**Configured Provisioned Concurrency for Lambda:**_    
 
-_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs, for a consistent and predictable read/write performance.
+_**Purpose?**_
+Reduces cold start latency, ensuring consistent & predictable performance. 
 
- _**Implemented Automatic Scaling for DynamoDB:**_ Dynamic Auto-Scaling through Targets and Policies for automatic, workload-responsive adjustments. Aids in resource-utilization & helps in cost optimisation
+> Pre-warming a set of Lambda function instances helps improve Responsiveness & Scalability during traffic spikes
+
+_**Provisioned Throughput for DynamoDB:**_ Configured DynamoDB Provisioned Throughput with RCUs and WCUs for a consistent and predictable read/write performance.
+
+ _**Implemented Automatic Scaling for DynamoDB:**_ Dynamic Auto-Scaling through Targets and Policies for automatic, workload-responsive adjustments ▶️ Aids in resource-utilization & helps in cost optimisation
 
 </br>
 
