@@ -67,40 +67,54 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ## How did we improvise on the design considerations?
 
-### The availability aspect
-
-➡️ The services we've used here are **Multi-AZ - resilent to Zonal Failures.**         
-Multi-AZ deployments 👉 Resilience and reliability of the application 
+### _Availability:-_
 
 
-➡️ **I've set some reserved concurrency for the important lambdas.** --> For service continuity 
+1 - I've set some **Reserved Concurrency for key lambdas.** 📌 For service continuity 
 
-> Wanted to ensure that client requests aren't lost due to other lambda functions consuming all available capacity 👍
-
-➡️ **Throttling controls in API Gateway.** We've implemented request throttling to manage the rate of incoming requests.
-Purpose?                 
---> We wanted something that could help sustain backpressure scenarios, - prevents my system from being overwhelmed.      
---> Helps us safeguard against a DDoS Attack  --> This means that my API will remain responsive to legit users.
+> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations, --> client requests aren't lost; due to other functions consuming all available capacity 👍👍
 
 </br>
 
-### Scalability 
-
-1 - **We've configured <ins>provisioned concurrency</ins> for Lambda**    
-
-_Purpose?_                                             
-**Reduces cold start latency 🟰 Consistent & predictable performance** 
+2 - The services we've used here are resilient to zonal failures.        
+  **Multi-AZ Deployments --> Resilience + Reliability** 
 
 </br>
 
-> **Pre-warming a set of lambda instances** helps us in improvising responsiveness & Scalability during traffic spikes 👍
+3- We've implemented **Request Throttling in API Gateway** --> Helps manage the rate of incoming requests.                         
+ - **I wanted the gateway to be capable of sustaining backpressure scenarios**, - prevents my system from being overwhelmed.      
+ - **Helps us safeguard against a DDoS attack**  --> This means that my API will remain responsive to legit users.
 
 </br>
 
-2- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent and predictable read/write performance.
+--
 
-3-  We wanted things to scale dynamically such thet we're workload-responsive always, **hence we implemented dynamic Auto-Scaling for DynamoDB through targets and policies** ▶️ **Cost optimisation**.          
-so, it'll be able to handle huge variations in load
+## _Scalability_ 
+
+1 - We've configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
+
+> _Reason:-_                                             
+> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency **
+</br>
+
+2-  We wanted things to _scale dynamically_ such thet we're workload-responsive always            
+--> Implemented **dynamic Auto-Scaling for DynamoDB** ▶️ **Cost-Optimisation**.  It'll be able to handle huge variations in load, in case of traffic spikes or quiter periods
+
+> This means Dynamo would automatically adjust based on actual usage _only_. We save on infra-costs.
+
+3- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent + predictable read/write performance.
+
+### How exactly is Provisoned Concurrency different from the reserved counterpart?
+
+✅ _Difference 1_ --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
+
+✅ _Difference 2_ --> **Provisoned Concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits** 
+
+> --> preventing a lambda function from consuming too many resources. 👍
+
+✅ 
+
+
 
 </br>
 
