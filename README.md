@@ -37,12 +37,12 @@ To provide clarity, we'll define the purpose of each component in our architectu
 | Service        | Identifier we're using     | Purpose - Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
 |||                               |
-| _API Gateway_  | _`Web-socket-api`_      | ➡️ Real-time communication in our application|                     
-| _DynamoDB_     | _`ConnectionsTable`_    | Purpose:- Our connection registry to efficiently track connections  |
-| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> Helps us ensure operational Integrity |
-|                | _`DisconnectHandler`_   | Updates the connection table by removing inactive connections |
-|                | _`SendMessageHandler`_  | --> Needed for reliable communication across all active connections|
-|                | _`DefaultHandler`_      | Helps notify the client when we're through with establishing the connection   |
+| _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
+| _DynamoDB_     | _`ConnectionsTable`_    | **Our connection registry** for tracking & managing connections  |
+| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure operational Integrity** |
+|                | _`DisconnectHandler`_   | ▶️ Removing entries from our table wrt inactive connections |
+|                | _`SendMessageHandler`_  | --> Needed for reliable communication|
+|                | _`DefaultHandler`_      | Helps notify the client when we're through with establishing a connection   |
 
 
 </br>
@@ -86,7 +86,7 @@ Purpose?
 
 ### Scalability 
 
-1 - **We've configured provisioned concurrency for Lambda**    
+1 - **We've configured <ins>provisioned concurrency</ins> for Lambda**    
 
 _Purpose?_                                             
 **Reduces cold start latency 🟰 Consistent & predictable performance** 
@@ -99,7 +99,8 @@ _Purpose?_
 
 2- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent and predictable read/write performance.
 
-3-  We wanted things to scale dynamically such thet we're workload-responsive always, **hence we implemented dynamic auto-scaling for DynamoDB through targets and policies** ▶️ **Cost optimisation**
+3-  We wanted things to scale dynamically such thet we're workload-responsive always, **hence we implemented dynamic Auto-Scaling for DynamoDB through targets and policies** ▶️ **Cost optimisation**.          
+so, it'll be able to handle huge variations in load
 
 </br>
 
