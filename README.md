@@ -72,7 +72,11 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 1 - I've set some **Reserved Concurrency for key lambdas.** 📌 For service continuity 
 
-> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations, --> client requests aren't lost; due to other functions consuming all available capacity 👍👍
+
+</br>
+
+> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations,          
+>  --> client requests aren't lost due to other Lambdas consuming all available capacity 👍👍
 
 </br>
 
@@ -81,9 +85,9 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-3- We've implemented **Request Throttling in API Gateway** --> Helps manage the rate of incoming requests.                         
- - **I wanted the gateway to be capable of sustaining backpressure scenarios**, - prevents my system from being overwhelmed.      
- - **Helps us safeguard against a DDoS attack**  --> This means that my API will remain responsive to legit users.
+3- We've implemented **Request Throttling in API Gateway** --> Helps manage the rate of incoming requests                        
+ - **I wanted the gateway to be capable of sustaining backpressure scenarios**, --> Prevents my system from being overwhelmed      
+ - **Helps us safeguard against a DDoS attack**  --> This means that my API will remain responsive to legit users
 
 </br>
 
@@ -94,7 +98,8 @@ To provide clarity, we'll define the purpose of each component in our architectu
 1 - We've configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
 
 > _Reason:-_                                             
-> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency **
+> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
+> 
 </br>
 
 2-  We wanted things to _scale dynamically_ such thet we're workload-responsive always            
@@ -104,15 +109,17 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 3- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent + predictable read/write performance.
 
+</br>
+
 ### How exactly is Provisoned Concurrency different from the reserved counterpart?
 
 ✅ _Difference 1_ --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
 
-✅ _Difference 2_ --> **Provisoned Concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits** 
+✅ _Difference 2_ --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
 
-> --> preventing a lambda function from consuming too many resources. 👍
+> --> Prevents a lambda function from consuming too many resources. 👍
 
-✅ 
+✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
 
 
 
