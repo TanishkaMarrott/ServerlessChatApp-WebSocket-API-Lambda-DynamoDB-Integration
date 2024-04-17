@@ -71,29 +71,28 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-3- We've implemented **Request Throttling in API Gateway** --> Helps manage the rate of incoming requests                        
- - **I wanted the gateway to be capable of sustaining backpressure scenarios** --> Prevents the system from being overwhelmed      
- - **Helps us safeguard against a DDoS attack**  --> This means that my API will remain responsive to legit users
+3- We've **implemented request throttling in API Gateway** --> Helps manage the rate of incoming requests                        
+ - **We designed the gateway to be capable of sustaining backpressure scenarios** ➡️ Prevents the system from being overwhelmed      
+ - **Helps us safeguard against a DDoS attack**  ➡️ This means that my API will remain responsive to legit users
 
 </br>
 
 --
 
-## _Scalability_ 
+### _Scalability_ 
 
-> The question we actually had to answer...
+#### How could we have the cost dynamics covered, while still being efficient wrt application's execution?
 
-## How can I have a flexible data storage costs while still ensuring my application  is well-performant?
+</br>
 
-📍 **Our's is an "experimental" application**        
-We had unpredictable traffic needs ----> **highly sporadic usage --> where provisioning capacity in advance was not at all cost-effective.**
+📍 Ours is an "experimental" application.       
+ ➡️ **We've got highly sporadic usage patterns -->  Provisioning capacity for Dynamo in advance was not at all cost-effective.**
 
-📍 I did not want to compromise on the execution of the application either, where Lambdas come into the play. Cold starts is a very typical problem when we deal with lambdas.            
-**We need to have a certain level of control on the performance-critical aspects as well.**          
+📍 I did not want to compromise on the execution of the application either, where Lambdas come into the play. **Cold starts is a very typical problem when we deal with lambdas.**            
+**We need to have a certain level of control over performance-critical aspects as well.**          
 
-### _This means we had to optimise cost + performance. Have the cost dynamics covered, while still being efficient in terms of lambda Executions_
 
-### _Part 1:-_
+####  _How did we overcome this challenge?_
 
 We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
 
@@ -114,7 +113,7 @@ We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures t
 
 ### _Part 2:-_
 
-We switched to `PAY_PER_REQUEST` mode  for DynamoDB. This mode is ideal for workloads with unpredictable traffic or when the workload is sporadic, as it eliminates the need for capacity planning and reduces costs by charging only for the actual reads and writes your application performs.
+**We switched to `PAY_PER_REQUEST` mode  for DynamoDB.** :: Eliminates the need for capacity planning and reduces costs by charging only for the actual reads and writes your application performs.
 
 ## Security 
 
