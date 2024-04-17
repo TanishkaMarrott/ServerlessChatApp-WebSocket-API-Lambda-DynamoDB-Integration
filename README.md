@@ -53,15 +53,15 @@ To provide clarity, we'll define the purpose of each component in our architectu
                         ⬇️
                   Triggers ConnectHandler
                         ⬇️
-                  ConnectHandler inserts connectionId into ConnectionsTable
+                  Inserts connectionId into ConnectionsTable
                         ⬇️
-                  WebSocket connection closes
+                  Connection closes
                         ⬇️
-                  DisconnectHandler automatically removes connectionId from ConnectionsTable
+                  DisconnectHandler removes the connectionId from ConnectionsTable
                         ⬇️
-                  SendMessageHandler iterates through connectionIds and sends messages to connected clients
+                  SendMessageHandler - iterates through connectionIds + sends messages to connected clients
                         ⬇️
-                  DefaultHandler --> notifies the client on establishment of the connection
+                  DefaultHandler --> notifies the client when we're done with establishing a connection
 
 </br>
 
@@ -69,13 +69,11 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### _Availability:-_
 
-
-1 - I've set some **Reserved Concurrency for key lambdas.** 📌 For service continuity 
-
+1 - I've set **Reserved Concurrency for key lambdas.** 📌 --> For service continuity 
 
 </br>
 
-> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations,          
+> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations         
 >  --> client requests aren't lost due to other Lambdas consuming all available capacity 👍👍
 
 </br>
@@ -86,7 +84,7 @@ To provide clarity, we'll define the purpose of each component in our architectu
 </br>
 
 3- We've implemented **Request Throttling in API Gateway** --> Helps manage the rate of incoming requests                        
- - **I wanted the gateway to be capable of sustaining backpressure scenarios**, --> Prevents my system from being overwhelmed      
+ - **I wanted the gateway to be capable of sustaining backpressure scenarios** --> Prevents the system from being overwhelmed      
  - **Helps us safeguard against a DDoS attack**  --> This means that my API will remain responsive to legit users
 
 </br>
@@ -95,20 +93,25 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ## _Scalability_ 
 
-1 - We've configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
+> The question we actually had to answer...
+
+## How can I have a flexible data storage costs while still ensuring my application  is well-performant?
+
+📍 **Our's is an "experimental" application**        
+We had unpredictable traffic needs ----> **highly sporadic usage --> where provisioning capacity in advance was not at all cost-effective.**
+
+📍 I did not want to compromise on the execution of the application either, where Lambdas come into the play. Cold starts is a very typical problem when we deal with lambdas.            
+**We need to have a certain level of control on the performance-critical aspects as well.**          
+
+### _This means we had to optimise cost + performance. Have the cost dynamics covered, while still being efficient in terms of lambda Executions_
+
+### _Part 1:-_
+
+We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
 
 > _Reason:-_                                             
 > ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
 > 
-</br>
-
-2-  We wanted things to _scale dynamically_ such thet we're workload-responsive always            
---> Implemented **dynamic Auto-Scaling for DynamoDB** ▶️ **Cost-Optimisation**.  It'll be able to handle huge variations in load, in case of traffic spikes or quiter periods
-
-> This means Dynamo would automatically adjust based on actual usage _only_. We save on infra-costs.
-
-3- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent + predictable read/write performance.
-
 </br>
 
 ### How exactly is Provisoned Concurrency different from the reserved counterpart?
@@ -121,9 +124,9 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
 
+### _Part 2:-_
 
-
-</br>
+We switched to `PAY_PER_REQUEST` mode  for DynamoDB. This mode is ideal for workloads with unpredictable traffic or when the workload is sporadic, as it eliminates the need for capacity planning and reduces costs by charging only for the actual reads and writes your application performs.
 
 ## Security 
 
@@ -134,13 +137,7 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 </br>
 
-### Cost-Optimization 
 
-**_Event-Driven architectural pattern:_** Pay-as-you-go model helps save on idle resources, cutting on unnecessary costs.
-
-**_Auto-Scaling configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
-
-</br>
 
 ### Performance Optimization 
 
