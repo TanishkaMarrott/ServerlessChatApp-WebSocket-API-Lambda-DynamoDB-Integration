@@ -9,18 +9,6 @@ It is built on top of AWS Services - Lambda, DynamoDB & API Gateway
 
 </br>
 
-## Table of Contents
-
-1. [System Architecture & Components](#system-architecture--components)
-2. [The Workflow](#the-workflow)
-3. [How did we improvise on the design considerations?](#how-did-we-improvise-on-the-design-considerations)
-4. [Setup](#setup)
-5. [Usage](#usage)
-6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
-7. [Contributions](#contributions)
-8. [Credit Attribution](#credit-attribution)
-
-</br>
 
 ## System Architecture & Components
 
