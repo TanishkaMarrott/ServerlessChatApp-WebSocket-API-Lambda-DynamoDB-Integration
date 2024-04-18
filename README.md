@@ -22,7 +22,7 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-| Service        | Identifier we're using     | Purpose - Why we've used?                       |
+| Services we've used        | Identifiers    | Purpose - Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
 |||                               |
 | _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
@@ -59,29 +59,37 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### _Availability:-_
 
-1 - I've set **reserved concurrency for key lambdas.** 📌 --> For service continuity 
+1 --> Configured **reserved concurrency for critical lambdas.**           
 
 </br>
 
-> ➡️ We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations.
-> Client requests aren't lost due to other Lambdas consuming all available capacity 👍👍  
+> Our critical lambdas will now have dedicated access to the required compute. **Our key operations, critical to the working of our applications won't be affected** 👍
 
-</br>
+ </br> 
+ 
+  ➜ We wanted to **protect key functions from being throttled** during peak times       
+ 
+  ➜ **There shouldn't be any sidelining due to resource contention** among other running lambdas         
 
-2 - The services we've used are resilient to zonal failures.        
-  ▶️ **Multi-AZ Deployments --> Resilience + Reliability** 
-
-</br>
-
-3- We've **implemented request throttling in the gateway to manage the rate of requests**                      
- --> **We designed the gateway to be capable of sustaining backpressure scenarios** ➡️ Prevents the system from being overwhelmed
- --> **Helps us safeguard against a DDoS attack**  ➡️ This means that our API will remain responsive to legit users
+ 📌 _Service continuity  = application reliability_
 
 </br>
 
 --
 
-### _Scalability_ 
+2) Throttling Controls for API Gateway. --> Managing the rate of incoming requests
+                 
+ **We designed the gateway to be capable of sustaining backpressure scenarios**. **Helps us safeguard against a DDoS attack**  ➡️ This means that our API will remain responsive to legit users
+
+2 - ▶️ **Multi-AZ Deployments for DynamoDB --> Resilience + Reliability** 
+
+</br>
+
+2
+
+</br>
+
+--
 
 
 ####  _How did we overcome this challenge?_
@@ -120,9 +128,9 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 > ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
 
-### Approach 1 -> Provisioned Concurrency
+####  Through Provisioned Concurrency
 
-If we would have provisioned concurrency in advance, **Lambda instances would be pre-initialised -->  up and running at all times.**
+ **Lambda instances would be pre-initialised -->  up and running at all times.**
 
 </br>
 
@@ -157,12 +165,6 @@ Step 1 --> We've added a new Lambda function specifically designed to warm up ou
 Step 2 --> Configured a CloudWatch event that triggers the warmer function based on a _schedule_ 
 
 Step 3 --> We've needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch, ensuring it operates within your AWS security guidelines.
-
-
-
-
-
-
 
 
 
