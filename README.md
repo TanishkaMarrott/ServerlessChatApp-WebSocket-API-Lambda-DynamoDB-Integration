@@ -41,15 +41,17 @@ To provide clarity, we'll define the purpose of each component in our architectu
                         ⬇️
                   Triggers ConnectHandler
                         ⬇️
-                  Inserts connectionId into ConnectionsTable
+                  Inserts connectionId into ConnectionsTable 
                         ⬇️
-                  Connection closes
-                        ⬇️
-                  DisconnectHandler removes the connectionId from ConnectionsTable
+                   Notifies the client when we're done with establishing a connection
                         ⬇️
                   SendMessageHandler - iterates through connectionIds + sends messages to connected clients
                         ⬇️
-                  DefaultHandler --> notifies the client when we're done with establishing a connection
+                  When triggered, DisconnectHandler removes the connectionId from ConnectionsTable
+                        ⬇️
+                  Connection closes
+                        
+
 
 </br>
 
@@ -57,12 +59,12 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### _Availability:-_
 
-1 - I've set **Reserved Concurrency for key lambdas.** 📌 --> For service continuity 
+1 - I've set **reserved concurrency for key lambdas.** 📌 --> For service continuity 
 
 </br>
 
-> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations         
->  --> client requests aren't lost due to other Lambdas consuming all available capacity 👍👍
+> ➡️ We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations.
+> Client requests aren't lost due to other Lambdas consuming all available capacity 👍👍  
 
 </br>
 
@@ -128,9 +130,9 @@ If we would have provisioned concurrency in advance, **Lambda instances would be
 
 </br>
 
-**_Scenario where this could have worked :-_**     
+**_Scenario where this would work:-_**     
 
-➡️ Where **absolutely zero cold starts** are essential, and I need to minimize latency - at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
+👉 Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
 
 </br>
 
@@ -147,6 +149,18 @@ If we would have provisioned concurrency in advance, **Lambda instances would be
 ➔ We **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
 
 ### Solution:-
+
+Implementing a custom Lambda Warmer.
+
+Step 1 --> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
+
+Step 2 --> Configured a CloudWatch event that triggers the warmer function based on a _schedule_ 
+
+Step 3 --> We've needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch, ensuring it operates within your AWS security guidelines.
+
+
+
+
 
 
 
