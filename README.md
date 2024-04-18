@@ -59,17 +59,19 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### _Availability:-_
 
-1 --> Configured **reserved concurrency for critical lambdas.**           
+1 --> We've configured **reserved concurrency for critical lambdas.**           
 
 </br>
 
 > Our critical lambdas will now have dedicated access to the required compute. **Our key operations, critical to the working of our applications won't be affected** 👍
 
- </br> 
- 
-  ➜ We wanted to **protect key functions from being throttled** during peak times       
- 
-  ➜ **There shouldn't be any sidelining due to resource contention** among other running lambdas         
+</br>
+
+_Purpose?_              
+ - We wanted to **protect key functions from being throttled** during peak times       
+ -  **There shouldn't be any sidelining due to resource contention** among other running lambdas
+        
+</br>
 
  📌 _Service continuity  = application reliability_
 
@@ -77,11 +79,18 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 --
 
-2) Throttling Controls for API Gateway. --> Managing the rate of incoming requests
-                 
- **We designed the gateway to be capable of sustaining backpressure scenarios**. **Helps us safeguard against a DDoS attack**  ➡️ This means that our API will remain responsive to legit users
+2 --> **API Gateway Throttling** ➡️ Limiting the rate of incoming requests
 
-2 - ▶️ **Multi-AZ Deployments for DynamoDB --> Resilience + Reliability** 
+</br>
+    
+> **We've designed the gateway to be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed. **Also, safeguards against a DDoS**  ➡️ This means that our API will remain responsive to legit users
+
+</br>
+
+
+
+
+ - ▶️ **Multi-AZ Deployments for DynamoDB --> Resilience + Reliability** 
 
 </br>
 
