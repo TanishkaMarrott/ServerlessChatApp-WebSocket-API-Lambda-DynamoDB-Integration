@@ -438,3 +438,62 @@ Resources:
       PolicyName: manageConnections
       Roles:
         - !Ref SendMessageHandlerServiceRole
+        
+  LambdaWarmerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambdaWarmer.handler
+      Role: !GetAtt LambdaWarmerRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          client = boto3.client('lambda')
+          
+          def handler(event, context):
+              functions_to_warm = [
+                "arn:aws:lambda:region:account-id:function:ConnectHandler",
+                "arn:aws:lambda:region:account-id:function:DisconnectHandler",
+                "arn:aws:lambda:region:account-id:function:SendMessageHandler"
+              ]
+              for function_name in functions_to_warm:
+                  client.invoke(FunctionName=function_name, InvocationType='RequestResponse')
+                  
+              return {
+                  'statusCode': 200,
+                  'body': 'Warmed up Lambda functions successfully.'
+              }
+      Runtime: python3.8
+      Timeout: 120
+      MemorySize: 128
+
+  LambdaWarmerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Policies:
+        - PolicyName: LambdaInvocationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ['lambda:InvokeFunction']
+                Resource: [
+                  "arn:aws:lambda:region:account-id:function:ConnectHandler",
+                  "arn:aws:lambda:region:account-id:function:DisconnectHandler",
+                  "arn:aws:lambda:region:account-id:function:SendMessageHandler"
+                ]
+
+  LambdaWarmerTrigger:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: 'rate(5 minutes)'
+      Targets:
+        - Arn: !GetAtt LambdaWarmerFunction.Arn
+          Id: "LambdaWarmerTarget"
+          RoleArn: !GetAtt LambdaWarmerRole.Arn
