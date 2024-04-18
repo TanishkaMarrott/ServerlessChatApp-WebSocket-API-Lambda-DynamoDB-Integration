@@ -66,7 +66,7 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-2 - The services we've used here are resilient to zonal failures.        
+2 - The services we've used are resilient to zonal failures.        
   ▶️ **Multi-AZ Deployments --> Resilience + Reliability** 
 
 </br>
@@ -82,17 +82,11 @@ To provide clarity, we'll define the purpose of each component in our architectu
 ### _Scalability_ 
 
 
-
-
-
 ####  _How did we overcome this challenge?_
 
 We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
 
-> _Reason:-_                                             
-> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
-> 
-</br>
+
 
 ### How exactly is Provisoned Concurrency different from the reserved counterpart?
 
@@ -122,33 +116,38 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 ### A) How did we optimise for performance in Lambda?
 
-#### Approach 1 - Provisioned Concurrency
+> ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
 
-If we would have implemented provisioned concurrency, a specified number of **Lambda instances would be pre-initialised, up and running at all times.**
+### Approach 1 -> Provisioned Concurrency
 
-> 🚩 This means that **we're incurring charges for uptime IRRESPECTIVE of the actual usage.**
-
-**Scenario where this could have worked :-**     
-
-➡️ Where **absolutely ZERO cold starts are essential**, and I need to minimize latency -- at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns
+If we would have provisioned concurrency in advance, **Lambda instances would be pre-initialised -->  up and running at all times.**
 
 </br>
 
-### Our Approach - Implementing a custom Lambda Warmer
+> This means that **we're incurring charges for uptime irrespective of the actual usage.** 🚩
 
-1 - We've achived an optimisation in performance by implementing a Lambda Warmer - using some Custom SDK Calls
+</br>
 
-Why?
+**_Scenario where this could have worked :-_**     
 
---> Using provisioned concurrencyConfig would mean you're keeping instances initialised, up and running throughout, This would incur a continuous uptime charge. This means it would be for use-case wherein we want absolutely ZERO cold starts ➡️We can't afford any latency lags, we want a super-low latency. 
+➡️ Where **absolutely zero cold starts** are essential, and I need to minimize latency - at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
 
-> this would be typically used in cases where we have consistent, predictable usage; and we want such performance-critical components to be always available to serve client requests
+</br>
 
---> In our case, we have somewhat sporadic usage patterns - It receives intermittent traffic, Hence, provisioning concurrency pre-hand for Lambda wouldn't be advisable
-We couldn't compromise on the application performance / the execution aspect either
+### Our Approach -> Implementing a custom Lambda Warmer
 
-Solution:-
-Hence, we decided to go in for a custom Lambda Warmer. --
+</br>
+
+> **➡️ _We needed something I call -"Cost-effective scalability"_**
+
+</br>
+
+➔ **Our application had sporadic usage patterns** 
+
+➔ We **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
+
+### Solution:-
+
 
 
 
