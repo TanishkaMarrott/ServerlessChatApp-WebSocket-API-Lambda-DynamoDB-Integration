@@ -67,13 +67,13 @@ To provide clarity, we'll define the purpose of each component in our architectu
 </br>
 
 2 - The services we've used here are resilient to zonal failures.        
-  **Multi-AZ Deployments --> Resilience + Reliability** 
+  ▶️ **Multi-AZ Deployments --> Resilience + Reliability** 
 
 </br>
 
-3- We've **implemented request throttling in API Gateway** --> Helps manage the rate of incoming requests                        
- - **We designed the gateway to be capable of sustaining backpressure scenarios** ➡️ Prevents the system from being overwhelmed      
- - **Helps us safeguard against a DDoS attack**  ➡️ This means that my API will remain responsive to legit users
+3- We've **implemented request throttling in the gateway to manage the rate of requests**                      
+ --> **We designed the gateway to be capable of sustaining backpressure scenarios** ➡️ Prevents the system from being overwhelmed
+ --> **Helps us safeguard against a DDoS attack**  ➡️ This means that our API will remain responsive to legit users
 
 </br>
 
@@ -81,15 +81,8 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ### _Scalability_ 
 
-#### How could we have the cost dynamics covered, while still being efficient wrt application's execution?
 
-</br>
 
-📍 Ours is an "experimental" application.       
- ➡️ **We've got highly sporadic usage patterns -->  Provisioning capacity for Dynamo in advance was not at all cost-effective.**
-
-📍 I did not want to compromise on the execution of the application either, where Lambdas come into the play. **Cold starts is a very typical problem when we deal with lambdas.**            
-**We need to have a certain level of control over performance-critical aspects as well.**          
 
 
 ####  _How did we overcome this challenge?_
@@ -125,8 +118,40 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 </br>
 
 
+## Performance Optimisation with cost dynamics into consideration:-
 
-### Performance Optimization 
+### A) How did we optimise for performance in Lambda?
+
+#### Approach 1 - Provisioned Concurrency
+
+If we would have implemented provisioned concurrency, a specified number of **Lambda instances would be pre-initialised, up and running at all times.**
+
+> 🚩 This means that **we're incurring charges for uptime IRRESPECTIVE of the actual usage.**
+
+**Scenario where this could have worked :-**     
+
+➡️ Where **absolutely ZERO cold starts are essential**, and I need to minimize latency -- at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns
+
+</br>
+
+### Our Approach - Implementing a custom Lambda Warmer
+
+1 - We've achived an optimisation in performance by implementing a Lambda Warmer - using some Custom SDK Calls
+
+Why?
+
+--> Using provisioned concurrencyConfig would mean you're keeping instances initialised, up and running throughout, This would incur a continuous uptime charge. This means it would be for use-case wherein we want absolutely ZERO cold starts ➡️We can't afford any latency lags, we want a super-low latency. 
+
+> this would be typically used in cases where we have consistent, predictable usage; and we want such performance-critical components to be always available to serve client requests
+
+--> In our case, we have somewhat sporadic usage patterns - It receives intermittent traffic, Hence, provisioning concurrency pre-hand for Lambda wouldn't be advisable
+We couldn't compromise on the application performance / the execution aspect either
+
+Solution:-
+Hence, we decided to go in for a custom Lambda Warmer. --
+
+
+
 
 _**Rate Limiting in API Gateway:**_ Message rate limiting enables the control of the load on the downstream systems that process the messages.
 
