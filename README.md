@@ -9,18 +9,6 @@ It is built on top of AWS Services - Lambda, DynamoDB & API Gateway
 
 </br>
 
-## Table of Contents
-
-1. [System Architecture & Components](#system-architecture--components)
-2. [The Workflow](#the-workflow)
-3. [How did we improvise on the design considerations?](#how-did-we-improvise-on-the-design-considerations)
-4. [Setup](#setup)
-5. [Usage](#usage)
-6. [Enhancements for the Current Architecture](#enhancements-for-the-current-architecture)
-7. [Contributions](#contributions)
-8. [Credit Attribution](#credit-attribution)
-
-</br>
 
 ## System Architecture & Components
 
@@ -37,12 +25,12 @@ To provide clarity, we'll define the purpose of each component in our architectu
 | Service        | Identifier we're using     | Purpose - Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
 |||                               |
-| _API Gateway_  | `Web-socket-api`      | ➡️ Real-time communication in our application|                     
-| _DynamoDB_     | `ConnectionsTable`    | **_Purpose?_** Acts as a connection registry to efficiently track connections  |
-| _AWS Lambda_   | `ConnectHandler`      | --> **_Every new connection must be recorded --> Operational Integrity_** |
-|                | `DisconnectHandler`   | Updates the connection table by **removing inactive connections** |
-|                | `SendMessageHandler`  | --> Needed for reliable communication across all active connections|
-|                | `DefaultHandler`      | Helps notify the client at connection setup   |
+| _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
+| _DynamoDB_     | _`ConnectionsTable`_    | **Our connection registry** for tracking & managing connections  |
+| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure operational Integrity** |
+|                | _`DisconnectHandler`_   | ▶️ Removing entries from our table wrt inactive connections |
+|                | _`SendMessageHandler`_  | --> Needed for reliable communication|
+|                | _`DefaultHandler`_      | Helps notify the client when we're through with establishing a connection   |
 
 
 </br>
@@ -53,45 +41,66 @@ To provide clarity, we'll define the purpose of each component in our architectu
                         ⬇️
                   Triggers ConnectHandler
                         ⬇️
-                  ConnectHandler inserts connectionId into ConnectionsTable
+                  Inserts connectionId into ConnectionsTable
                         ⬇️
-                  WebSocket connection closes
+                  Connection closes
                         ⬇️
-                  DisconnectHandler automatically removes connectionId from ConnectionsTable
+                  DisconnectHandler removes the connectionId from ConnectionsTable
                         ⬇️
-                  SendMessageHandler iterates through connectionIds and sends messages to connected clients
+                  SendMessageHandler - iterates through connectionIds + sends messages to connected clients
                         ⬇️
-                  DefaultHandler --> notifies the client on establishment of the connection
+                  DefaultHandler --> notifies the client when we're done with establishing a connection
 
 </br>
 
 ## How did we improvise on the design considerations?
 
-### The availability aspect
+### _Availability:-_
 
-1 - The services we've used here are **Multi-AZ - resilent to Zonal Failures.** 👍
-
-2 - **We've set some reserved concurrency in lambda.** --> Helps us in controlling the maximum number of concurrent invocations 
-
-> We won't lose requests due to other functions consuming all of the available concurrency.
-
-3 - **Implemented Throttling in API Gateway.** We had to control the volume of API requests hitting the gateway --> Mitigating a DDoS Attack. ➡️ The APIs thus wouldn't be overwhelmed by too many requests.
+1 - I've set **Reserved Concurrency for key lambdas.** 📌 --> For service continuity 
 
 </br>
 
-### Scalability 
-
-1 - **We've configured provisioned concurrency for Lambda**    
-_Purpose?_                                             
-**Reduces cold start latency 🟰 Consistent & predictable performance** 
-
-> **Pre-warming a set of lambda instances** helps us in improvising responsiveness & Scalability during traffic spikes 👍
-
-2- **We've provisioned throughput for DynamoDB with RCUs and WCUs** ➡️ a consistent and predictable read/write performance.
-
-3-  We wanted things to scale dynamically such thet we're workload-responsive always, **hence we implemented dynamic auto-scaling for DynamoDB through targets and policies** ▶️ **Cost optimisation**
+> We wanted to ensure that such Lambdas have the necessary resources they need for smooth operations         
+>  --> client requests aren't lost due to other Lambdas consuming all available capacity 👍👍
 
 </br>
+
+2 - The services we've used are resilient to zonal failures.        
+  ▶️ **Multi-AZ Deployments --> Resilience + Reliability** 
+
+</br>
+
+3- We've **implemented request throttling in the gateway to manage the rate of requests**                      
+ --> **We designed the gateway to be capable of sustaining backpressure scenarios** ➡️ Prevents the system from being overwhelmed
+ --> **Helps us safeguard against a DDoS attack**  ➡️ This means that our API will remain responsive to legit users
+
+</br>
+
+--
+
+### _Scalability_ 
+
+
+####  _How did we overcome this challenge?_
+
+We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
+
+
+
+### How exactly is Provisoned Concurrency different from the reserved counterpart?
+
+✅ _Difference 1_ --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
+
+✅ _Difference 2_ --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
+
+> --> Prevents a lambda function from consuming too many resources. 👍
+
+✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
+
+### _Part 2:-_
+
+**We switched to `PAY_PER_REQUEST` mode  for DynamoDB.** :: Eliminates the need for capacity planning and reduces costs by charging only for the actual reads and writes your application performs.
 
 ## Security 
 
@@ -102,15 +111,46 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 </br>
 
-### Cost-Optimization 
 
-**_Event-Driven architectural pattern:_** Pay-as-you-go model helps save on idle resources, cutting on unnecessary costs.
+## Performance Optimisation with cost dynamics into consideration:-
 
-**_Auto-Scaling configurations:_** Especially in the case of sporadic workloads, it has the ability to scale down as well. 
+### A) How did we optimise for performance in Lambda?
+
+> ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
+
+### Approach 1 -> Provisioned Concurrency
+
+If we would have provisioned concurrency in advance, **Lambda instances would be pre-initialised -->  up and running at all times.**
 
 </br>
 
-### Performance Optimization 
+> This means that **we're incurring charges for uptime irrespective of the actual usage.** 🚩
+
+</br>
+
+**_Scenario where this could have worked :-_**     
+
+➡️ Where **absolutely zero cold starts** are essential, and I need to minimize latency - at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
+
+</br>
+
+### Our Approach -> Implementing a custom Lambda Warmer
+
+</br>
+
+> **➡️ _We needed something I call -"Cost-effective scalability"_**
+
+</br>
+
+➔ **Our application had sporadic usage patterns** 
+
+➔ We **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
+
+### Solution:-
+
+
+
+
 
 _**Rate Limiting in API Gateway:**_ Message rate limiting enables the control of the load on the downstream systems that process the messages.
 
