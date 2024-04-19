@@ -61,52 +61,35 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-1 --> We've configured **reserved concurrency for important lambdas.**           
+**1 --> We've set reserved concurrency for important Lambdas.**     
+Rationale:-        
+Our critical lambdas would always have access to sufficient compute for operational functionality / Service continuity
+
+</br>
+ 
+> **I wanted to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas**👍
 
 </br>
 
-> **Our critical lambdas will now have dedicated access to the required compute.** Our key operations, critical to the working of our applications won't be affected 👍
+ **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
 
 </br>
 
-_Why did it matter?_              
+**3 --> Implemented throttling for our API Gateway:-**         
 
- --> We wanted to **prevent critical Lambdas from being throttled** during peak times       
- -->  There **shouldn't be any sidelining due to resource contention** among other running lambdas
-
- 📌 _--> Application Reliability 👍_
-
-</br>
+ > Reason 1:-  **Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
+>     
+> Reason 2:- **Helps us safeguard against a DDoS**  ➡️ This means that our API will remain responsive to legit users
 
 </br>
 
-2 --> **Enabled Point-in-time recovery for DynamoDB.**  
+**4 --> DynamoDB automatically replicates data across AZs** 
 
-> **We had to be cognizant of data durability** / availability, in event of accidental writes/deletes. Our recovery mechanism to retrieve data within the last 35 days
+ ➡️ Multi-AZ Deployments = Data Redundancy = High Availability
 
-</br>
 
-3 --> **We've implemented throttling for our API Gateway**         
-
-  -->   Our **gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
-     
---> **Helps us safeguard against a DDoS**  ➡️ This means that our API will remain responsive to legit users
-
-</br>
-
-4 --> **DynamoDB automatically replicates data across AZs,** 
-
-> Multi-AZ Deployments 👉 Data redundancy = High Availability, in case of service disruption.
-
-</br>
 
 --
-
-
-####  _How did we overcome this challenge?_
-
-We configured <ins>**Provisioned Concurrency**</ins> for Lambdas. This ensures that my critical Lambdas will keep a specified number of instances always available at all times, --> Highly Responsive 👍 
-
 
 
 ### How exactly is Provisoned Concurrency different from the reserved counterpart?
