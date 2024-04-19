@@ -8,7 +8,10 @@ Resources:
       AttributeDefinitions:
         - AttributeName: connectionId
           AttributeType: S
-      BillingMode: PAY_PER_REQUEST
+      ProvisionedThroughput: # Switching to provisioned throughput
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
     UpdateReplacePolicy: Delete
