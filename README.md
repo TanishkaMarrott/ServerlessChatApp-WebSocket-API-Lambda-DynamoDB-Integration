@@ -72,23 +72,21 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 </br>
 
---
 
  **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
 
 </br>
 
---
 
 **3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 
->     
 >   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a DDoS**
 
 </br>
 
 **4 **Multi-AZ Deployments => Data Redundancy => High Availability**
 --> DynamoDB automatically replicates data across AZs  
+
 </br>
 
 ---
@@ -102,9 +100,9 @@ This means configuring Auto-Scaling was essential for DynamoDB
 
 </br>
 
-> **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins> I mean the Read and Write Capacity units**
+> **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** I mean the Read and Write Capacity units
 > 
-> **---> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.** 👍
+> **↪️ It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.** 👍
 
 </br>
 
@@ -114,15 +112,15 @@ This means configuring Auto-Scaling was essential for DynamoDB
 
 I had to answer this question..
 
-### Performance Optimisation for lambda, but with the cost dynamics into consideration:-
-
 </br>
+
+### Performance Optimisation for Lambda, but with the Cost dynamics into consideration:-
+
 
 > ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
 
-</br>
 
-###  My first approach - Through Provisioned Concurrency
+####  _Approach 1 :- Through Provisioned Concurrency_
 
  --> Lambda instances would be pre-initialised -->  up and running at all times.
 
@@ -140,7 +138,7 @@ Where **absolutely zero cold starts** are essential, and we need to minimize lat
 
 --
 
-### Our Approach -> Implementing a custom Lambda Warmer
+#### _Our Approach -> Implementing a custom Lambda Warmer_
 
 Why?
 
@@ -148,9 +146,9 @@ Why?
 
 ➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important. 
 
-### 💡 Solution:-
+### How did we solve this challenge?
 
-Implementing a custom Lambda Warmer.
+Implementing a custom Lambda Warmer. 💡
 
 Step 1 --> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
 
