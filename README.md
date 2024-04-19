@@ -80,18 +80,20 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 --
 
-**3 --> Why Throttling in API Gateway?**         
+**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 
- >   **Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 >     
->  **Helps us safeguard against a DDoS**  ➡️ This means that our API will remain responsive to legit users
+>   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a DDoS**
 
 </br>
 
-**4 --> DynamoDB automatically replicates data across AZs**  
-> **Multi-AZ Deployments => Data Redundancy => High Availability**
+**4 **Multi-AZ Deployments => Data Redundancy => High Availability**
+--> DynamoDB automatically replicates data across AZs  
+</br>
 
 ---
+
+</br>
 
 ## _Cost-effective Scalability. How?_
 
@@ -100,14 +102,15 @@ This means configuring Auto-Scaling was essential for DynamoDB
 
 </br>
 
-> **We've included Auto-scaling policies for both RCUs and WCUs. I mean the Read and Write Capacity units**
-> **---> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.**
+> **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins> I mean the Read and Write Capacity units**
+> 
+> **---> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.** 👍
 
 </br>
 
 --
 
-2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances"                  
+2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅                 
 
 I had to answer this question..
 
@@ -115,24 +118,27 @@ I had to answer this question..
 
 </br>
 
-> ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
+> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
 
 </br>
 
 ###  My first approach - Through Provisioned Concurrency
 
- **--> Lambda instances would be pre-initialised -->  up and running at all times.**
+ --> Lambda instances would be pre-initialised -->  up and running at all times.
 
 </br>
 
-> **We're incurring charges for uptime irrespective of the actual usage.** 🚩Potential Red Flag
+> 🚩Potential Red Flag:- **We're incurring charges for uptime irrespective of the actual usage.** 
 
 </br>
 
 **_Scenario where this would work:-_**     
-👉 Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
+
+Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
 
 </br>
+
+--
 
 ### Our Approach -> Implementing a custom Lambda Warmer
 
