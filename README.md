@@ -55,19 +55,20 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 </br>
 
-## How did we improvise on the design considerations?
+## Design considerations
 
-### _Availability:-_
+### _How did we improvise on the application's availability?_
 
 </br>
 
 **1 --> We've set reserved concurrency for important Lambdas.**     
+
 Rationale:-        
 Our critical lambdas would always have access to sufficient compute for operational functionality / Service continuity
 
 </br>
  
-> **I wanted to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas**👍
+> ➡️ **I wanted to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas**👍
 
 </br>
 
@@ -75,7 +76,7 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 </br>
 
-**3 --> Implemented throttling for our API Gateway:-**         
+**3 --> Why Throttling in API Gateway?**         
 
  > Reason 1:-  **Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 >     
@@ -87,42 +88,28 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
  ➡️ Multi-AZ Deployments = Data Redundancy = High Availability
 
-
-
 --
 
+### _Cost-effective Scalability. How?_
 
-### How exactly is Provisoned Concurrency different from the reserved counterpart?
-
-✅ _Difference 1_ --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
-
-✅ _Difference 2_ --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
-
-> --> Prevents a lambda function from consuming too many resources. 👍
-
-✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
-
-### _Part 2:-_
-
-**We switched to `PAY_PER_REQUEST` mode  for DynamoDB.** :: Eliminates the need for capacity planning and reduces costs by charging only for the actual reads and writes your application performs.
-
-## Security 
-
-_**Lambda Authorizer - API Gateway Authorization:**_
-IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
-
-_**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+1 --> One of our objective was that our data store should automatically adjust to match the workload.
+This means configuring Auto-Scaling was essential for DynamoDB      
 
 </br>
 
+> **We've included Auto-scaling policies for both RCUs and WCUs. I mean the Read and Write Capacity units**
+> **---> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.**
 
-## Performance Optimisation with cost dynamics into consideration:-
+</br>
 
-### A) How did we optimise for performance in Lambda?
+2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances"                  
+
+Side note:-
+#### Performance Optimisation for lambda, but with the cost dynamics into consideration:-
 
 > ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
 
-####  Through Provisioned Concurrency
+####  Approach 1 - Through Provisioned Concurrency
 
  **Lambda instances would be pre-initialised -->  up and running at all times.**
 
@@ -142,13 +129,14 @@ _**Fine-grained Access Control:**_ Have granted the least privilege access to re
 
 </br>
 
+
 > **➡️ _We needed something I call -"Cost-effective scalability"_**
 
 </br>
 
 ➔ **Our application had sporadic usage patterns** 
 
-➔ We **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
+➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
 
 ### Solution:-
 
@@ -156,9 +144,42 @@ Implementing a custom Lambda Warmer.
 
 Step 1 --> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
 
-Step 2 --> Configured a CloudWatch event that triggers the warmer function based on a _schedule_ 
+Step 2 --> **Configured a CloudWatch event that triggers the warmer function** based on a _schedule_ 
+That could be either every 5 minutes, or fixed, at a time when peak usage is anticipated.
 
-Step 3 --> We've needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch, ensuring it operates within your AWS security guidelines.
+Step 3 --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
+
+
+
+</br>
+
+> So, even though function invocations might increase, ➡️ **Having Pre-Warmed lambda instances = Scalability + Performance Optimisation**
+
+</br>
+
+### _How exactly is Provisoned Concurrency different from the reserved counterpart?_
+
+</br>
+
+✅ Difference 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
+
+✅ Difference 2 --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
+
+> --> Prevents a lambda function from consuming too many resources. 👍
+
+✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
+
+
+## Security 
+
+_**Lambda Authorizer - API Gateway Authorization:**_
+IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
+
+_**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+
+</br>
+
+
 
 
 
