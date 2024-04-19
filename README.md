@@ -106,8 +106,6 @@ This means configuring Auto-Scaling was essential for DynamoDB
 
 </br>
 
---
-
 2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅                 
 
 I had to answer this question..
@@ -122,7 +120,7 @@ I had to answer this question..
 
 ####  _Approach 1 :- Through Provisioned Concurrency_
 
- --> Lambda instances would be pre-initialised -->  up and running at all times.
+ This actually means that a certain number of exec. environments - or rather, lambda instances would be running **at all times**
 
 </br>
 
@@ -138,7 +136,7 @@ Where **absolutely zero cold starts** are essential, and we need to minimize lat
 
 --
 
-#### _Our Approach -> Implementing a custom Lambda Warmer_
+#### _Our approach -> Implementing a custom Lambda Warmer_
 
 Why?
 
@@ -157,6 +155,7 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 
 Step 3 --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
 
+</br>
 
 ### _How exactly is Provisoned Concurrency different from the reserved counterpart?_
 
