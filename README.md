@@ -95,28 +95,25 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 ## _Cost-effective Scalability. How?_
 
-1 --> One of our objective was that our data store should automatically adjust to match the workload.
-This means configuring Auto-Scaling was essential for DynamoDB      
+1 --> One of our objective was that our data store should automatically adjust to match the workload. This means configuring Auto-Scaling was essential for DynamoDB      
+
+ **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** I mean the Read and Write Capacity units
+ 
+> --> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand. 👍
 
 </br>
 
-> **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** I mean the Read and Write Capacity units
-> 
-> **↪️ It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand.** 👍
-
-</br>
-
-2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅                 
-
-I had to answer this question..
-
-</br>
-
-### Performance Optimisation for Lambda, but with the Cost dynamics into consideration:-
-
+2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅               
 
 > ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
 
+but I had to answer this question..
+
+</br>
+
+###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)
+
+We had two options:-
 
 ####  _Approach 1 :- Through Provisioned Concurrency_
 
@@ -140,9 +137,9 @@ Where **absolutely zero cold starts** are essential, and we need to minimize lat
 
 Why?
 
-➔ **Our application had sporadic usage patterns** 
+1 ➔ **Our application had sporadic usage patterns** 
 
-➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important. 
+2 ➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important. 
 
 ### How did we solve this challenge?
 
@@ -150,7 +147,7 @@ Implementing a custom Lambda Warmer. 💡
 
 Step 1 --> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
 
-Step 2 --> **Configured a CloudWatch event that triggers the warmer function** based on a _schedule_ 
+Step 2 --> **Configured a CloudWatch event that triggers the warmer function**           
 That could be either every 5 minutes, or fixed, at a time when peak usage is anticipated.
 
 Step 3 --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
@@ -161,13 +158,13 @@ Step 3 --> We needed IAM Role and Policy that grants the warmer function permiss
 
 </br>
 
-✅ Difference 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring you've got a certain portion of the Total Concurrency dedicated** to this lambda.
+ Point 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring we've got a certain portion of the Total Concurrency dedicated** to this lambda.
 
-✅ Difference 2 --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
+ Point 2  --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
 
-> --> Prevents a lambda function from consuming too many resources. 👍
+>  Prevents a lambda function from consuming too many resources. 👍
 
-✅ _Difference 3_ --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
+ Point 3 --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
 
 
 ## Security 
