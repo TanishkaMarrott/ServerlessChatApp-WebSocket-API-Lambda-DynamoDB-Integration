@@ -57,7 +57,7 @@ To provide clarity, we'll define the purpose of each component in our architectu
 
 ## Design considerations
 
-### _How did we improvise on the application's availability?_
+## _How did we improvise on the application's availability?_
 
 </br>
 
@@ -72,25 +72,28 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 </br>
 
+--
+
  **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
 
 </br>
 
+--
+
 **3 --> Why Throttling in API Gateway?**         
 
- > Reason 1:-  **Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
+ >   **Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 >     
-> Reason 2:- **Helps us safeguard against a DDoS**  ➡️ This means that our API will remain responsive to legit users
+>  **Helps us safeguard against a DDoS**  ➡️ This means that our API will remain responsive to legit users
 
 </br>
 
-**4 --> DynamoDB automatically replicates data across AZs** 
+**4 --> DynamoDB automatically replicates data across AZs**  
+> **Multi-AZ Deployments => Data Redundancy => High Availability**
 
- ➡️ Multi-AZ Deployments = Data Redundancy = High Availability
+---
 
---
-
-### _Cost-effective Scalability. How?_
+## _Cost-effective Scalability. How?_
 
 1 --> One of our objective was that our data store should automatically adjust to match the workload.
 This means configuring Auto-Scaling was essential for DynamoDB      
@@ -102,43 +105,44 @@ This means configuring Auto-Scaling was essential for DynamoDB
 
 </br>
 
+--
+
 2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances"                  
 
-Side note:-
-#### Performance Optimisation for lambda, but with the cost dynamics into consideration:-
+I had to answer this question..
 
-> ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
-
-####  Approach 1 - Through Provisioned Concurrency
-
- **Lambda instances would be pre-initialised -->  up and running at all times.**
+### Performance Optimisation for lambda, but with the cost dynamics into consideration:-
 
 </br>
 
-> This means that **we're incurring charges for uptime irrespective of the actual usage.** 🚩
+> ▶️ Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency
+
+</br>
+
+###  My first approach - Through Provisioned Concurrency
+
+ **--> Lambda instances would be pre-initialised -->  up and running at all times.**
+
+</br>
+
+> **We're incurring charges for uptime irrespective of the actual usage.** 🚩Potential Red Flag
 
 </br>
 
 **_Scenario where this would work:-_**     
-
 👉 Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
 
 </br>
 
 ### Our Approach -> Implementing a custom Lambda Warmer
 
-</br>
-
-
-> **➡️ _We needed something I call -"Cost-effective scalability"_**
-
-</br>
+Why?
 
 ➔ **Our application had sporadic usage patterns** 
 
-➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important.
+➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important. 
 
-### Solution:-
+### 💡 Solution:-
 
 Implementing a custom Lambda Warmer.
 
@@ -149,13 +153,6 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 
 Step 3 --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
 
-
-
-</br>
-
-> So, even though function invocations might increase, ➡️ **Having Pre-Warmed lambda instances = Scalability + Performance Optimisation**
-
-</br>
 
 ### _How exactly is Provisoned Concurrency different from the reserved counterpart?_
 
