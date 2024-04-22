@@ -52,7 +52,6 @@ To provide clarity, we'll define the purpose of each component in our architectu
                   Connection closes
                         
 
-
 </br>
 
 ## Design considerations
