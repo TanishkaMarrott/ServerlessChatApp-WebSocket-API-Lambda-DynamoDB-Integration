@@ -2,10 +2,9 @@
 
 DynamoWave Chat is a modern and scalable serverless real-time chat application. 
 
-It is built on top of AWS Services - Lambda, DynamoDB & API Gateway
+It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
-➡️ **Focus:** Enhancing the application to ensure high-performance delivery.
-
+➡️ **Our core focus here:** _Enhancing the application to ensure a  high-performance delivery._
 
 </br>
 
@@ -13,25 +12,6 @@ It is built on top of AWS Services - Lambda, DynamoDB & API Gateway
 ## System Architecture & Components
 
 <img width="927" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
-
-</br>
-
-### Services we've used, with their purpose
-
-To provide clarity, we'll define the purpose of each component in our architecture:-
-
-</br>
-
-| Services we've used        | Identifiers    | Purpose - Why we've used?                       |
-|--------------------|---------------------|-------------------------------|
-|||                               |
-| _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
-| _DynamoDB_     | _`ConnectionsTable`_    | **Our connection registry** for tracking & managing connections  |
-| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure operational Integrity** |
-|                | _`DisconnectHandler`_   | ▶️ Removing entries from our table wrt inactive connections |
-|                | _`SendMessageHandler`_  | --> Needed for reliable communication|
-|                | _`DefaultHandler`_      | Helps notify the client when we're through with establishing a connection   |
-
 
 </br>
 
@@ -51,6 +31,24 @@ To provide clarity, we'll define the purpose of each component in our architectu
                         ⬇️
                   Connection closes
                         
+
+</br>
+
+### Services we've used plus their purpose
+
+We'll quickly define the purpose of each component in our architecture:-
+
+</br>
+
+| Services we've used        | Identifiers    | Purpose --> Why we've used?                       |
+|--------------------|---------------------|-------------------------------|
+| _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
+| _DynamoDB_     | _`ConnectionsTable`_    | **Our connection registry**. This is for tracking & managing connections  |
+| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure we're good from an operational standpoint** |
+|                | _`DisconnectHandler`_   | ▶️ Removing entries from our table wrt inactive connections |
+|                | _`SendMessageHandler`_  | --> We'll need this for reliable communication across|
+|                | _`DefaultHandler`_      | Helps notify our client when we're through with establishing a connection   |
+
 
 </br>
 
@@ -83,7 +81,7 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 </br>
 
-**4 **Multi-AZ Deployments => Data Redundancy => High Availability**
+**4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
 --> DynamoDB automatically replicates data across AZs  
 
 </br>
