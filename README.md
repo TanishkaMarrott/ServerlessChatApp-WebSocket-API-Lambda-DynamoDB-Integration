@@ -69,13 +69,12 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 </br>
 
-
  **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
 
 </br>
 
 
-**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
+**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡We've implemented both throttling & rate limiting (It's essential to control both of these metrics, number of requests/ second and number of requests being sent )
 
 >   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a DDoS**
 
