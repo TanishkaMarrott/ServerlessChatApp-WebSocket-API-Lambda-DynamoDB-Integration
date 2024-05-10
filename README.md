@@ -28,7 +28,7 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
                         ⬇️
                   Once the session ends --> DisconnectHandler function would remove the connectionId from the registry
                         ⬇️
-                  Connection closes
+                  The connection closes now
                         
 
 </br>
@@ -50,7 +50,6 @@ Now, that we're through with the functionality, let's now shift our attention to
 |                | _`SendMessageHandler`_  | --> We'll need this for reliable communication across|
 |                | _`DefaultHandler`_      | Helps notify our client when we're through with establishing a connection   |
 
-
 </br>
 
 ## Design considerations:-
@@ -63,65 +62,63 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 </br>
  
-> ➡️I'd like to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas👍
+> This helps us prevent critical Lambdas from being throttled during peak times. I'd say that we're "allocating" a portion of the total concurrency to the spciifc lambda function. It'll always have the resources it needs to run 👍
 
 </br>
 
- **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
+ **2 -->  We need to be cognizant of the data durability aspect as well.** 
+We've enabled Point-In-Time recovery -- Add about  PITR
 
+ </br>
 
-**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
+**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) We've implemented both API Throttling & Rate Limiting.
 
-We've implemented both API Throttling & Rate Limiting.      
-> By having both of these defined:-                 
-> --> We're seeking control / predefining a threshold on the maximum number of requests that hit the gateway (Per-second basis --> max number of requests per second) 
-> --> Plus, a cap on the total number of requests originating from a particular client --> in a specific time window. This has a strategic advantage to it, from an availability standpoint, This'll prevent downstream services from being overwhelmed.
+</br>
 
+> By having both of these defined:-                   
+> --> We're predefining a threshold on the maximum number of requests that can hit the gateway per second --> max number of requests per second) 
+> --> Plus, a cap on the total number of requests originating from a particular client --> in a specific time window. This has a strategic advantage to it, from an availability standpoint, This'll prevent downstream services from being overwhelmed.          
 > ➡️ The API stays responsive to legitimate users, Plus, helps us avert a potential DDoS, that might bring down our entire system.
 
+</br>
 
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
---> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures.
-
-> This is very use-case specific. Had we been dealing with production systems, that need really high availability across Regions, I'd suggest gping in for DynamoDB global tables when you'd be in a scenario like:-
-> i. Its a geographically distributed database, and you'd want the data to be positioned near your users
-> ii. it's a mission critical application, and needs to be available even in the event of a regional outage.
-> iii. There're some regulatory compliance commitments, due to which data should not leave a region
-
-
+--> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures _in a region_
 
 </br>
 
+> This is a very use-case specific pointer. Had we been dealing with production systems, wherein you need super-high availability across AWS Regions, I'd suggest opting in for DynamoDB global tables.  --> For scenarios like:-                     
+> i. You've got a geographically distributed user base, and you'd want the data to be positioned near your users          
+> ii. it's a mission critical application, and needs to be available even in the event of a regional outage.        
+> iii. There're some regulatory compliance commitments, due to which data should not leave a region
+>
+> Something important to note here, it _necessitates_ the need of deploying other supporting components in multiple regions as well. In order to have a full secondary failover mechanism to another region
+>
+> I'd say that this is a _pure_ cost- availability tradeoff. We should be carefully weigh if the expenses justify/ weigh against the actual needs of our application
+
+</br>
 
 ### Cost-effective Scalability. How?
 
-1 --> One of our objective was that our data store should automatically adjust to match the workload. This means configuring Auto-Scaling was essential for DynamoDB      
+1 --> I'd come across adaptive auto-scaling / adaptive workload management for DynamoDB, and I knew I had to utilise this
 
- **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** 
- 
-</br>
+>  Our application, has sporadic usage patterns, 
 
-> --> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand. 👍
+ To achieve this, we implemented auto-scaling policies for both Read Capacity Units (RCUs) and Write Capacity Units (WCUs) on DynamoDB.**
 
-</br>
+   > 
 
-2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅               
 
-</br>
+2 --> We had to eliminate lambda cold starts for improvising on the performance plus of the application
 
-> ▶️ **Prewarming a set of lambda instances = Reduces cold Starts = Reducing latency**
+> Prewarming a set of lambda instances = Reduces cold starts = Reduces latency 👍
 
-</br>
-
-But the question we had to answer....
-
-</br>
 
 ###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
 
 We had two options at hand:-
 
-####  Approach 1 was through setting provisioned concurrency
+####  Approach I was through setting provisioned concurrency
 
 We'd have a certain number of execution environments - or rather, lambda instances would be running **at all times**
 
@@ -204,7 +201,6 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 If high availability and failover capabilities are critical, the regional setup with Route 53 offers better control over traffic distribution during regional outages. Configure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), --> **Cost-Redundancy Tradeoff**
 
-Deploy critical components in multiple regions, Cross-region replicas, DynamoDB Global Tables, 
 
 
 
