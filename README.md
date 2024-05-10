@@ -17,17 +17,17 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
 ## **How does the workflow look like?**
 
-                  Establishes the websocket connection
+                  We'll first establish the websocket connection
                         ⬇️
-                  Triggers ConnectHandler
+                  It'll trigger the ConnectHandler lambda
                         ⬇️
-                  Inserts connectionId into ConnectionsTable 
+                  This function would insert connectionId into the ConnectionsTable 
                         ⬇️
-                   Notifies the client when we're done with establishing a connection
+                   The client would be notified when we're done with establishing a connection
                         ⬇️
-                  SendMessageHandler - iterates through connectionIds + sends messages to connected clients
+                  SendMessageHandler lambda would iterate through connectionIds + sends messages to the connected clients
                         ⬇️
-                  When triggered, DisconnectHandler removes the connectionId from ConnectionsTable
+                  Once the session ends --> DisconnectHandler function would remove the connectionId from the registry
                         ⬇️
                   Connection closes
                         
@@ -52,16 +52,22 @@ We'll quickly define the purpose of each component in our architecture:-
 
 </br>
 
-## Design considerations
+> Please make sure to check out the cloudFormation template above, for the initail configurations and deployment
 
-## _How did we improvise on the application's availability?_
+Now, that we're through with the functionality, let's now shift our attention to the NFRs
 
 </br>
 
-**1 --> We've set reserved concurrency for important Lambdas.**     
+## Design considerations:-
+
+### How did we improvise on the application's availability?
+
+</br>
+
+**1 --> We've set reserved concurrency for our important Lambdas.**     
 
 Rationale:-        
-Our critical lambdas would always have access to sufficient compute for operational functionality / Service continuity
+Our critical lambdas _should_ always have access to sufficient compute for operational functionality / Service continuity purposes,
 
 </br>
  
@@ -74,22 +80,21 @@ Our critical lambdas would always have access to sufficient compute for operatio
 </br>
 
 
-**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡We've implemented both throttling & rate limiting (It's essential to control both of these metrics, number of requests/ second and number of requests being sent )
+**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 
->   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a DDoS**
+We've implemented both throttling & rate limiting (It's essential to control both of these metrics, number of requests/ second and number of requests being sent )
+
+>   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a potential DDoS**
 
 </br>
 
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
---> DynamoDB automatically replicates data across AZs  
+--> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures
 
 </br>
 
----
 
-</br>
-
-## _Cost-effective Scalability. How?_
+### Cost-effective Scalability. How?
 
 1 --> One of our objective was that our data store should automatically adjust to match the workload. This means configuring Auto-Scaling was essential for DynamoDB      
 
@@ -103,15 +108,15 @@ Our critical lambdas would always have access to sufficient compute for operatio
 
 > ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
 
-but I had to answer this question..
+But the question we had to answer....
 
 </br>
 
-###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)
+###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
 
-We had two options:-
+We had two options at hand:-
 
-####  _Approach 1 :- Through Provisioned Concurrency_
+####  _Approach 1 was through setting provisioned concurrency_
 
  This actually means that a certain number of exec. environments - or rather, lambda instances would be running **at all times**
 
@@ -125,9 +130,9 @@ We had two options:-
 
 Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
 
-</br>
+> This is something I'd definitely recommend, when we're dealing with production systems. However, given our usage pattern and subsequent impact on the price point, we'd go in for a custom lambda warmer for now
 
---
+</br>
 
 #### _Our approach -> Implementing a custom Lambda Warmer_
 
@@ -150,15 +155,14 @@ Step 3 --> We needed IAM Role and Policy that grants the warmer function permiss
 
 </br>
 
-### _How exactly is Provisoned Concurrency different from the reserved counterpart?_
-
-</br>
+### How exactly is Provisoned Concurrency different from the reserved counterpart?
 
  Point 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring we've got a certain portion of the Total Concurrency dedicated** to this lambda.
 
  Point 2  --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
 
 >  Prevents a lambda function from consuming too many resources. 👍
+
 
  Point 3 --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
 
