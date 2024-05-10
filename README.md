@@ -8,7 +8,6 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
 </br>
 
-
 ## System Architecture & Components
 
 <img width="927" alt="image" src="https://github.com/TanishkaMarrott/ServerlessChatApp-WebSocket-API-Lambda-DynamoDB-Integration/assets/78227704/afed5865-ebe0-4292-b402-b74216650655">
@@ -34,17 +33,19 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
 </br>
 
-### Services we've used plus their purpose
+## Services we've used plus their purpose
 
 We'll quickly define the purpose of each component in our architecture:-
 
-</br>
+> Please make sure to check out the cloudFormation template above, for the initial configurations plus the deployment
+Now, that we're through with the functionality, let's now shift our attention to the NFRs
+
 
 | Services we've used        | Identifiers    | Purpose --> Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
-| _API Gateway_  | _`Web-socket-api`_      | ➡️ **Real-time communication** in our application|                     
-| _DynamoDB_     | _`ConnectionsTable`_    | **Our connection registry**. This is for tracking & managing connections  |
-| _AWS Lambda_   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure we're good from an operational standpoint** |
+| _API Gateway | _Web-socket-api_      | ➡️ **Real-time communication** in our application|                     
+| _DynamoDB     | _ConnectionsTable_    | **Our connection registry**. This is for tracking & managing connections  |
+| _AWS Lambda   | _`ConnectHandler`_      | --> Every new connection must be recorded --> **Helps us ensure we're good from an operational standpoint** |
 |                | _`DisconnectHandler`_   | ▶️ Removing entries from our table wrt inactive connections |
 |                | _`SendMessageHandler`_  | --> We'll need this for reliable communication across|
 |                | _`DefaultHandler`_      | Helps notify our client when we're through with establishing a connection   |
@@ -52,44 +53,37 @@ We'll quickly define the purpose of each component in our architecture:-
 
 </br>
 
-> Please make sure to check out the cloudFormation template above, for the initail configurations and deployment
-
-Now, that we're through with the functionality, let's now shift our attention to the NFRs
-
-</br>
-
 ## Design considerations:-
 
 ### How did we improvise on the application's availability?
 
-</br>
-
-**1 --> We've set reserved concurrency for our important Lambdas.**     
-
-Rationale:-        
+**1 --> We've set reserved concurrency for our important Lambdas.**         
 Our critical lambdas _should_ always have access to sufficient compute for operational functionality / Service continuity purposes,
+We're ensuring we've got a certain quota of concurrency apportioned to the lambda. this'll enable a very fair distribution of compute amongst all the lambdas. 
 
 </br>
  
-> ➡️ **I wanted to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas**👍
+> ➡️I'd like to prevent critical Lambdas from being throttled during peak times.  There shouldn't be any sidelining due to resource contention among other running lambdas👍
 
 </br>
 
  **2 -->  We need to be cognizant of the data durability aspect as well.** in event of accidental deletes. Our recovery mechanism to retrieve data within the last 35 days.    🏁  Hence, **have enabled Point-In-Time-Recovery for our DynamoDB** Table
 
-</br>
-
 
 **3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) 💡
 
-We've implemented both throttling & rate limiting (It's essential to control both of these metrics, number of requests/ second and number of requests being sent )
+We've implemented both API Throttling & Rate Limiting.      
+> By having both of these defined:-                 
+> --> We're seeking control / predefining a threshold on the maximum number of requests that hit the gateway (Per-second basis --> max number of requests per second) 
+> --> Plus, a cap on the total number of requests originating from a particular client --> in a specific time window. This has a strategic advantage to it, from an availability standpoint, This'll prevent downstream services from being overwhelmed.
 
->   ➡️ This means that our API will remain responsive to legit users. **Helps us safeguard against a potential DDoS**
+> ➡️ The API stays responsive to legitimate users, Plus, helps us avert a potential DDoS, that might bring down our entire system.
 
-</br>
 
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
---> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures
+--> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures.
+
+> This is very use-case specific. Had we been dealing with production systems, that need really high availability across Regions, (I'll consider a situation wherein my user-base is geographically dispersed / its critcial )
 
 </br>
 
@@ -100,13 +94,19 @@ We've implemented both throttling & rate limiting (It's essential to control bot
 
  **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** I mean the Read and Write Capacity units
  
+</br>
+
 > --> It scales up to handle the increased traffic and down to reduce our costs, when there's a lower demand. 👍
 
 </br>
 
 2 --> **We had initially configured Provisioned Concurrency for lambdas** as well. We had to keep some number of execution environments pre-ready, That's actually called "Warming up the Function instances" ✅               
 
+</br>
+
 > ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
+
+</br>
 
 But the question we had to answer....
 
@@ -116,9 +116,9 @@ But the question we had to answer....
 
 We had two options at hand:-
 
-####  _Approach 1 was through setting provisioned concurrency_
+####  Approach 1 was through setting provisioned concurrency
 
- This actually means that a certain number of exec. environments - or rather, lambda instances would be running **at all times**
+We'd have a certain number of execution environments - or rather, lambda instances would be running **at all times**
 
 </br>
 
@@ -126,15 +126,17 @@ We had two options at hand:-
 
 </br>
 
-**_Scenario where this would work:-_**     
+**Scenario where this would work:-**     
 
 Where **absolutely zero cold starts** are essential, and we need to minimize latency at all costs. Also, **in cases where we've got predictable and consistent traffic** patterns.
+
+</br>
 
 > This is something I'd definitely recommend, when we're dealing with production systems. However, given our usage pattern and subsequent impact on the price point, we'd go in for a custom lambda warmer for now
 
 </br>
 
-#### _Our approach -> Implementing a custom Lambda Warmer_
+#### Our approach --> Implementing a custom Lambda Warmer
 
 Why?
 
@@ -142,7 +144,9 @@ Why?
 
 2 ➔ I **could not compromise on my performance-critical aspects.** For me, application execution is equally important. 
 
-### How did we solve this challenge?
+</br>
+
+#### How did we solve this challenge?
 
 Implementing a custom Lambda Warmer. 💡
 
@@ -155,32 +159,33 @@ Step 3 --> We needed IAM Role and Policy that grants the warmer function permiss
 
 </br>
 
-### How exactly is Provisoned Concurrency different from the reserved counterpart?
+#### How exactly is Provisoned Concurrency different from the reserved counterpart?
 
  Point 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring we've got a certain portion of the Total Concurrency dedicated** to this lambda.
 
  Point 2  --> **Provisioned concurrency is geared towards enhancing performance**, while  **reserved counterpart is about managing resource limits.** 
 
->  Prevents a lambda function from consuming too many resources. 👍
+</br>
 
-
- Point 3 --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
-
-
-## Security 
-
-_**Lambda Authorizer - API Gateway Authorization:**_
-IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
-
-_**Fine-grained Access Control:**_ Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+>  Prevents a lambda function from consuming too many resources. 👍 --> Fair resource utilisation amongst functions
 
 </br>
 
+ Point 3 --> **PC means you're incurring costs of keeping such instances ready at all times**, while **RC means you've sanctioned limits, no costs per se** 
 
+</br>
 
+## From a security standpoint
 
+**Lambda Authorizer - API Gateway Authorization:**
+IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
-_**Rate Limiting in API Gateway:**_ Message rate limiting enables the control of the load on the downstream systems that process the messages.
+**Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
+
+</br>
+
+## 
+
 
 _**Choice of WebSocket APIs over REST APIs:**_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
 
@@ -192,9 +197,9 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 **How can I make my current architecture resilent to regional failures?**
 
-If high availability and failover capabilities are critical, the regional setup with Route 53 offers better control over traffic distribution during regional outages. Configure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), Cost-Redundancy Tradeoff
+If high availability and failover capabilities are critical, the regional setup with Route 53 offers better control over traffic distribution during regional outages. Configure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), --> **Cost-Redundancy Tradeoff**
 
-Deploy critical components in multiple regions, enable PITR for Data Stores as a Backup-and-Restore Mechanism, Cross-region replicas, DynamoDB Global Tables, 
+Deploy critical components in multiple regions, Cross-region replicas, DynamoDB Global Tables, 
 
 
 
