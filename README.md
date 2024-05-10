@@ -83,7 +83,12 @@ We've implemented both API Throttling & Rate Limiting.
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
 --> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures.
 
-> This is very use-case specific. Had we been dealing with production systems, that need really high availability across Regions, (I'll consider a situation wherein my user-base is geographically dispersed / its critcial )
+> This is very use-case specific. Had we been dealing with production systems, that need really high availability across Regions, I'd suggest gping in for DynamoDB global tables when you'd be in a scenario like:-
+> i. Its a geographically distributed database, and you'd want the data to be positioned near your users
+> ii. it's a mission critical application, and needs to be available even in the event of a regional outage.
+> iii. There're some regulatory compliance commitments, due to which data should not leave a region
+
+
 
 </br>
 
@@ -92,7 +97,7 @@ We've implemented both API Throttling & Rate Limiting.
 
 1 --> One of our objective was that our data store should automatically adjust to match the workload. This means configuring Auto-Scaling was essential for DynamoDB      
 
- **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** I mean the Read and Write Capacity units
+ **We've included <ins>Auto-scaling policies for both RCUs and WCUs.</ins>** 
  
 </br>
 
@@ -104,7 +109,7 @@ We've implemented both API Throttling & Rate Limiting.
 
 </br>
 
-> ▶️ **Prewarming a set of lambda instances 🟰 Reduces cold Starts 🟰 Reducing latency**
+> ▶️ **Prewarming a set of lambda instances = Reduces cold Starts = Reducing latency**
 
 </br>
 
