@@ -89,18 +89,18 @@ We've enabled Point-In-Time recovery -- Add about  PITR
 
 > This is a very use-case specific pointer. Had we been dealing with production systems, wherein you need super-high availability across AWS Regions, I'd suggest opting in for DynamoDB global tables.  --> For scenarios like:-                     
 > i. You've got a geographically distributed user base, and you'd want the data to be positioned near your users          
-> ii. it's a mission critical application, and needs to be available even in the event of a regional outage.        
+> ii. it's a mission critical application, and needs to be available even in the event of a regional outage.     
 > iii. There're some regulatory compliance commitments, due to which data should not leave a region
 >
-> Something important to note here, it _necessitates_ the need of deploying other supporting components in multiple regions as well. In order to have a full secondary failover mechanism to another region
+> Something important to note here, it _necessitates_ the need of deploying other supporting components in multiple regions as well --> for you to have a full secondary failover mechanism in another region, up and running.
 >
-> I'd say that this is a _pure_ cost- availability tradeoff. We should be carefully weigh if the expenses justify/ weigh against the actual needs of our application
+> I'd say that this is a _pure_ cost - availability tradeoff. We should be carefully weigh if the expenses actually justify/ weigh against the needs of our application
 
 </br>
 
 ### Cost-effective Scalability. How?
 
-1 --> I'd come across adaptive auto-scaling / adaptive workload management for DynamoDB, and I knew I had to utilise this
+1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this
 
 >  Our application, has sporadic usage patterns, 
 
@@ -108,9 +108,9 @@ We've enabled Point-In-Time recovery -- Add about  PITR
 
    > 
 
+2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
 
-2 --> We had to eliminate lambda cold starts for improvising on the performance plus of the application
-
+> The simple equation, I often mention :-        
 > Prewarming a set of lambda instances = Reduces cold starts = Reduces latency 👍
 
 
@@ -182,6 +182,7 @@ Step 3 --> We needed IAM Role and Policy that grants the warmer function permiss
 **Lambda Authorizer - API Gateway Authorization:**
 IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
+--> We've pruned down IAM policies for the service role
 **Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
 
 </br>
@@ -216,7 +217,6 @@ If we're looking at a geographically dispersed audience, and need to reduce conn
 
 DAX (DynamoDB Accelerator) wouldn't be something we'd be taking about here. Caching would be ideal in cases where we need to optimise read-performance / access to some frequent data. Introducing caching in a real-time application doesn't serve the purpose - we'd be introducing unnecessary complexities and costs, without achieving something fruitful. Features like Auto-Scaling, Provisioned Throughput, have already been incorporated here. 
 
-If the chat application spans multiple AWS regions, I would consider using DynamoDB Global Tables for multi-region replication, for ensuring low-latency access for users across the globe.
 
 A consistent high-volume read/write traffic would be a signal for me to explore DynamoDB batch operations. Particularly, for bulk write or delete operations, such as managing multiple connections in the ConnectHandler and DisconnectHandler Lambda functions. For individual, sporadic requests, where the application rarely receives bursts of traffic, the system would need to wait for a certain number of requests to accumulate before processing them together. In a scenario with sporadic requests, this delay might be noticeable. Not recommended for applications with low, sporadic traffic.
 
