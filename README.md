@@ -54,7 +54,7 @@ Now, that we're through with the functionality, let's now shift our attention to
 
 ## Design considerations:-
 
-### How did we improvise on the application's availability?
+### How did we improvise on the application's availability/ reliability?
 
 **1 --> We've set reserved concurrency for our important Lambdas.**         
 Our critical lambdas _should_ always have access to sufficient compute for operational functionality / Service continuity purposes,
@@ -62,12 +62,16 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 </br>
  
-> This helps us prevent critical Lambdas from being throttled during peak times. I'd say that we're "allocating" a portion of the total concurrency to the spciifc lambda function. It'll always have the resources it needs to run 👍
+> This helps us prevent critical Lambdas from being throttled during peak times. I'd say that we're "allocating" a portion of the total concurrency to the spciifc lambda function. It'll always have the resources it needs to run/ function smoothly 👍
 
 </br>
 
  **2 -->  We need to be cognizant of the data durability aspect as well.** 
-We've enabled Point-In-Time recovery -- Add about  PITR
+ 
+ </br>
+ 
+> We'll enable PITR for our DynamoDB Table --> Point-In-Time Recovery. Reason? It'll enable us to restore data to any second in the last 35 days. This means we're improvising on the data's availability and fault-tolerance capabilities, Wherein there might've been situations wherein data is accidentally overwritten or is deleted. In such scenarios, we shouldn't rely upon traditional backup methods, (that're scheduled at a fixed time of the day). Once, we've enabled PITR - It'll capture changes to the dynamo table, continuously, allowing us to retrieve up-to-date information, --> Benefit? We've negated any potential data loss that might occur. Plus, this doesn't involve operational overhead or costs associated with capacity planning/ over-provisioning.
+> It essentially _simplifies_ the entire process of reverting back to our desired state👍
 
  </br>
 
@@ -98,15 +102,18 @@ We've enabled Point-In-Time recovery -- Add about  PITR
 
 </br>
 
+### If I were to improvise on API Gateway's availability further:-
+
+Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
+
+> I mean configure a DNS health check to automatically failover to the API Gateway in the secondary region. (We'd also have to ensure that the supporting components too are up and running in another region!)
+> More of a cost-redundancy tradeoff here, Will need to weigh in the benefits against the potential costs incurred, and it really justifies against the current needs of the application 👍
+
 ### Cost-effective Scalability. How?
 
 1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this
 
->  Our application, has sporadic usage patterns, 
 
- To achieve this, we implemented auto-scaling policies for both Read Capacity Units (RCUs) and Write Capacity Units (WCUs) on DynamoDB.**
-
-   > 
 
 2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
 
@@ -152,12 +159,12 @@ Why?
 
 Implementing a custom Lambda Warmer. 💡
 
-Step 1 --> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
+--> We've added a new Lambda function specifically designed to warm up our critical functions. ➤ Configured to invoke the critical functions **in a manner that "mimics typical user interactions" without altering my application state.**
 
-Step 2 --> **Configured a CloudWatch event that triggers the warmer function**           
+ --> **Configured a CloudWatch event that triggers the warmer function**           
 That could be either every 5 minutes, or fixed, at a time when peak usage is anticipated.
 
-Step 3 --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
+ --> We needed IAM Role and Policy that grants the warmer function permission to invoke other Lambda functions and log to CloudWatch
 
 </br>
 
@@ -198,34 +205,19 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 ### Enhancements for the Current Architecture
 
-**How can I make my current architecture resilent to regional failures?**
-
-If high availability and failover capabilities are critical, the regional setup with Route 53 offers better control over traffic distribution during regional outages. Configure Route53 DNS Health check to failover to an API Gateway in a secondary region, (We will have to make sure we've got all the required resources in that regions), --> **Cost-Redundancy Tradeoff**
-
-
-
-
-**What other strategies can be implemented to make this architecture even more scalable?**
-Custom Auto-Scaling Logic using CloudWatch Alarms
 
 **How can I make this even more secure & withstand potential threats?**
 Use WAF on top of API gateway for enhancing the security of the current architecture. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
 
 **How can I achieve a better Performance Optimisation, while maintaining costs?**
 
-If we're looking at a geographically dispersed audience, and need to reduce connection times, I'd go in for the Edge-Optimised API Gateway. With Regional API Gateway, the requests traverse through the public internet, and then reach the regional endpoint. While with an Edge-optimised API gateway, the API requests travel through the CloudFront Points of Presence (PoP), before hitting the API Endpoint. The first one is thus a simpler, and an effective solution, with minimal costs & configuration. If I need more control over the routing logic, or global load balancing, and I'm more concerned about the DR Capabilities, the latter, Multiple Regional API Endpoints with Route 53 Latency-Based Routing would be my alternative here.
-
-DAX (DynamoDB Accelerator) wouldn't be something we'd be taking about here. Caching would be ideal in cases where we need to optimise read-performance / access to some frequent data. Introducing caching in a real-time application doesn't serve the purpose - we'd be introducing unnecessary complexities and costs, without achieving something fruitful. Features like Auto-Scaling, Provisioned Throughput, have already been incorporated here. 
-
-
 A consistent high-volume read/write traffic would be a signal for me to explore DynamoDB batch operations. Particularly, for bulk write or delete operations, such as managing multiple connections in the ConnectHandler and DisconnectHandler Lambda functions. For individual, sporadic requests, where the application rarely receives bursts of traffic, the system would need to wait for a certain number of requests to accumulate before processing them together. In a scenario with sporadic requests, this delay might be noticeable. Not recommended for applications with low, sporadic traffic.
-
-I would monitor and adjust Provisioned / Reserved Concurrency (Lambda) & DynamoDB throughput based on real-time demand - through Performance Insights / CW. This would help reduce unnecessary standing costs for over-provisioning.
+.
 
 
 
 ### Contributions 
-Contributions are most welcome, feel free to submit issues, feature requests, or pull requests. 
+Contributions are most welcome, feel free to submit issues, feature/ pull requests. 
 If you've got  suggestions on how I could further improvise on the architectural / configurational aspects, please feel free to drop a message on tanishka.marrott@gmail.com. I'd love to hear your thoughts on this!
 
 ### Credit Attribution
