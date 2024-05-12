@@ -75,7 +75,7 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
  </br>
 
-**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections) We've implemented both API Throttling & Rate Limiting.
+**3 --> Our gateway should be capable of sustaining backpressure scenarios**. Our backend services won't be overwhelmed.  (Because we've limited the rate of incoming connections through both API Throttling & Rate Limiting.
 
 </br>
 
@@ -103,11 +103,17 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 </br>
 
 
-#### Code optimisations that'll help in enhancing Lambda's reli
+#### Code optimisations that'll help in enhancing lambda from a reliability standpoint
+
+We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. --> Application's stability ++ 
+
+╰┈➤ For errors that're recoverable, we've setup some retry mechanism
 
 ### If I were to improvise on API Gateway's availability further:-
 
 Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
+
+</br>
 
 > I mean configure a DNS health check to automatically failover to the API Gateway in the secondary region. (We'd also have to ensure that the supporting components too are up and running in another region!)
 > More of a cost-redundancy tradeoff here, Will need to weigh in the benefits against the potential costs incurred, and it really justifies against the current needs of the application 👍
