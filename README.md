@@ -102,6 +102,9 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 </br>
 
+
+#### Code optimisations that'll help in enhancing Lambda's reli
+
 ### If I were to improvise on API Gateway's availability further:-
 
 Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
@@ -109,10 +112,11 @@ Even though API Gateway is a managed service, as is inherently resilient to zona
 > I mean configure a DNS health check to automatically failover to the API Gateway in the secondary region. (We'd also have to ensure that the supporting components too are up and running in another region!)
 > More of a cost-redundancy tradeoff here, Will need to weigh in the benefits against the potential costs incurred, and it really justifies against the current needs of the application 👍
 
+</br>
+
 ### Cost-effective Scalability. How?
 
 1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this
-
 
 
 2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
@@ -194,8 +198,6 @@ IAM authorization is implemented for the $connect method using Lambda Authorizer
 
 </br>
 
-## 
-
 
 _**Choice of WebSocket APIs over REST APIs:**_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
 
@@ -203,6 +205,7 @@ _**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to
 
 </br>
 
+## How could I amplify my performance in
 ### Enhancements for the Current Architecture
 
 
