@@ -103,7 +103,7 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 </br>
 
 
-#### Code optimisations that'll help enhancing lambda from a reliability standpoint
+### Code optimisations that'll help enhancing lambda from a reliability standpoint
 
 We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. 
 
@@ -127,13 +127,13 @@ We had to ensure we're handling errors gracefully plus having some retry mechani
 
 ╰┈➤ An additional enhancement, we'd consider making in the second iteration, as a part of refining my architecture further, would be to set up a DLQ - dead Letter Queue to store failed delivery messages --> this would mean zero data loss, and also provides a potential opportunity to re-process and analyse these messages further. 
 
-
 </br>
 
-### If I were to improvise on API Gateway's availability further:-
+## If I were to improvise on API Gateway's availability further:-
 
 Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
 
+</br>
 
 > I mean configuring a DNS health check to automatically failover to the API Gateway in the secondary region.
 > (We'd also have to ensure that the supporting components too are up and running in another region!)
@@ -141,16 +141,22 @@ Even though API Gateway is a managed service, as is inherently resilient to zona
 
 </br>
 
-### Cost-effective Scalability. How?
+## Cost-effective Scalability. How?
 
 1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this            
 _Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
+
+</br>
 
 #### We had to choose between On-demand throughput versus Provisoned Throughput + Auto-scaling. Which one did we opt while designing this?
 
  i. We had to consider the price point here. The "Per-unit cost" was turning out to be expensive for the on-demand mode than the provisioned counterpart + Autoscaling.
 
+</br>
+
  > Yes, this was the _catch_ here. It's absolutely wonderful when you've got unpredictable access patterns, and capacity planning looks difficult. But since it charges you on the actual read/ writes, the cost per unit capacity, turns out to be way higher. If we'd be in a scenario, where there's consistent traffic coming in, levels are pretty much predictable, I'll advise it'll be way more cost-effective to go with a baseline set up for provisioned read./ write units plus auto-scale based on utilisation thresholds.
+
+</br>
 
 --
 
@@ -229,30 +235,34 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 **Lambda Authorizer - API Gateway Authorization:**
 IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
---> We've pruned down IAM policies for the service role attached to the lambdas, Fine grained permissions have an inverse correlation with Privilege Escalation
-**Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidenti
+Point 2 --> We've pruned down IAM policies for the service roles attached to the lambdas, dynamo; strictly to what the component _actually_ needs for its functioning/ access.
 
-</br>
+> Finer the permissions, lesser the ridk of Privilege Escalation 👍
+
+Point 3 -->  Implementing throttling / rate limiting mitigates a potential DDoS, We've mentioned this above in the availability section too --> this is because we're controlling the number of requests that a user / bot can hit the gateway ✔️
+
 
 ### **What kind of refinements could make my current design even more secure ?**
 
-I'd consider using a WAF on top of the API gateway. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
+I'd consider using a WAF - Web Application Firewall,  on top of API gateway. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
 
-
-### Enhancements for the Current Architecture
 
 **How can I achieve a better Performance Optimisation, while maintaining costs?**
 
 A consistent high-volume read/write traffic would be a signal for me to explore DynamoDB batch operations. Particularly, for bulk write or delete operations, such as managing multiple connections in the ConnectHandler and DisconnectHandler Lambda functions. For individual, sporadic requests, where the application rarely receives bursts of traffic, the system would need to wait for a certain number of requests to accumulate before processing them together. In a scenario with sporadic requests, this delay might be noticeable. Not recommended for applications with low, sporadic traffic.
-.
 
-
+</br>
 
 ### Contributions 
-Contributions are most welcome, feel free to submit issues, feature/ pull requests. 
-If you've got  suggestions on how I could further improvise on the architectural / configurational aspects, please feel free to drop a message on tanishka.marrott@gmail.com. I'd love to hear your thoughts on this!
+
+Contributions are most welcome!
+
+--> If you've got  suggestions on how I could further improvise on the architectural / configurational aspects, please feel free to drop a message on tanishka.marrott@gmail.com. I'd love to hear your thoughts on this!
+
+</br>
 
 ### Credit Attribution
-Special thanks to [AWS](https://aws.amazon.com/) for providing an excellent blog that served as the foundation for this project. This -> [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
+
+I'm grateful to [AWS](https://aws.amazon.com/) for providing an excellent blog that served as the foundation for this project. This -> [https://docs.aws.amazon.com/apigateway/latest/developerguide/websocket-api-chat-app.html], was instrumental in guiding the implementation of the base architecture.
 
 
