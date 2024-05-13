@@ -11,7 +11,6 @@ Resources:
       ProvisionedThroughput: # Switching to provisioned throughput
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
-
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
     UpdateReplacePolicy: Delete
@@ -119,26 +118,47 @@ Resources:
       Code:
         ZipFile: |-
           const AWS = require('aws-sdk');
-                const ddb = new AWS.DynamoDB.DocumentClient();
-                exports.handler = async function (event, context) {
-                  try {
-                    await ddb
-                      .put({
-                        TableName: process.env.table,
-                        Item: {
-                          connectionId: event.requestContext.connectionId,
-                        },
-                      })
-                      .promise();
-                  } catch (err) {
-                    return {
-                      statusCode: 500,
-                    };
-                  }
-                  return {
-                    statusCode: 200,
-                  };
-                };
+          const ddb = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
+
+          const maxRetries = 3; // Maximum number of retries
+          let retryCount = 0; // Current retry count
+
+          exports.handler = async function (event, context) {
+            try {
+              const result = await attemptPutItem();
+              return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+              };
+            } catch (err) {
+              console.error('Error in processing DynamoDB request:', err);
+              return {
+                statusCode: 500,
+                body: 'Internal server error',
+              };
+            }
+          };
+
+          async function attemptPutItem() {
+            try {
+              return await ddb.put({
+                TableName: process.env.table,
+                Item: {
+                  connectionId: event.requestContext.connectionId,
+                },
+              }).promise();
+            } catch (error) {
+              if (retryCount < maxRetries) {
+                retryCount++;
+                console.log(`Retry ${retryCount} for connection ID:`, event.requestContext.connectionId);
+                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential back-off
+                return attemptPutItem();
+              } else {
+                console.error('Max retries reached');
+                throw new Error('Max retry attempts failed');
+              }
+            }
+          }
       Role: !GetAtt ConnectHandlerServiceRole.Arn
       Environment:
         Variables:
@@ -160,7 +180,7 @@ Resources:
       Name: Prod
       ProvisionedConcurrencyConfig:
         ProvisionedConcurrentExecutions: 5
-    DisconnectHandlerServiceRole:
+  DisconnectHandlerServiceRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -441,7 +461,8 @@ Resources:
       PolicyName: manageConnections
       Roles:
         - !Ref SendMessageHandlerServiceRole
-        
+
+  # This is Optional       
   LambdaWarmerFunction:
     Type: AWS::Lambda::Function
     Properties:
