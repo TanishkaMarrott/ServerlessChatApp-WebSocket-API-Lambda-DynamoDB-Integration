@@ -105,9 +105,30 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 #### Code optimisations that'll help enhancing lambda from a reliability standpoint
 
-We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. --> Application's stability ++ 
+We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. 
 
-╰┈➤ 
+╰┈➤ Number one, We had to ensure we've incorporated some error handling mechanisms within our function logic, This will make sure we're preventing any potential errors/ issues from cascading down, --> Errors can be gracefully handled by our lambda, --> Application's stability ++ 👍
+
+╰┈➤ We felt it would be necessary for our critical lambda - SendMessageHandler to recover from transient/ temporary errors, for instance, network communication errors, or DB Operations, This way we'd be increasing the probability of a successful message delivery.
+
+</br>
+
+> Because, it'll re-attempt the operations multiple times, befor it's considered failed
+
+</br>
+
+╰┈➤ Incessant retries would lead us to a scenario wherein the function might enter into an infinite loop, and we'd want to prevent this, Hence, we had to make usre we've got some exponential backoffs in place too, along with the retry mechanisma, This would then iteratively increase the time interval between two subsequent retries. 
+
+</br>
+
+> So, we're not only giving the error more time to resolve, we're also reducing backpressure on downstream systems 👍
+
+</br>
+
+╰┈➤ An additional enhancement, we'd consider making in the second iteration, as a part of refining my architecture further, would be to set up a DLQ - dead Letter Queue to store failed delivery messages --> this would mean zero data loss, and also provides a potential opportunity to re-process and analyse these messages further. 
+
+
+</br>
 
 ### If I were to improvise on API Gateway's availability further:-
 
@@ -124,6 +145,14 @@ Even though API Gateway is a managed service, as is inherently resilient to zona
 
 1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this            
 _Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
+
+#### We had to choose between On-demand throughput versus Provisoned Throughput + Auto-scaling. Which one did we opt while designing this?
+
+ i. We had to consider the price point here. The "Per-unit cost" was turning out to be expensive for the on-demand mode than the provisioned counterpart + Autoscaling.
+
+ > Yes, this was the _catch_ here. It's absolutely wonderful when you've got unpredictable access patterns, and capacity planning looks difficult. But since it charges you on the actual read/ writes, the cost per unit capacity, turns out to be way higher. If we'd be in a scenario, where there's consistent traffic coming in, levels are pretty much predictable, I'll advise it'll be way more cost-effective to go with a baseline set up for provisioned read./ write units plus auto-scale based on utilisation thresholds.
+
+--
 
 2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
 
@@ -200,17 +229,17 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 **Lambda Authorizer - API Gateway Authorization:**
 IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
---> We've pruned down IAM policies for the service role
+--> We've pruned down IAM policies for the service role attached to the lambdas, Fine grained permissions have an inverse correlation with Privilege Escalation
 **Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidenti
 
 </br>
 
-## How could I amplify my performance in
+### **What kind of refinements could make my current design even more secure ?**
+
+I'd consider using a WAF on top of the API gateway. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
+
+
 ### Enhancements for the Current Architecture
-
-
-**How can I make this even more secure & withstand potential threats?**
-Use WAF on top of API gateway for enhancing the security of the current architecture. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
 
 **How can I achieve a better Performance Optimisation, while maintaining costs?**
 
