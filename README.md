@@ -103,33 +103,34 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 </br>
 
 
-#### Code optimisations that'll help in enhancing lambda from a reliability standpoint
+#### Code optimisations that'll help enhancing lambda from a reliability standpoint
 
 We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. --> Application's stability ++ 
 
-╰┈➤ For errors that're recoverable, we've setup some retry mechanism
+╰┈➤ 
 
 ### If I were to improvise on API Gateway's availability further:-
 
 Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
 
-</br>
 
-> I mean configure a DNS health check to automatically failover to the API Gateway in the secondary region. (We'd also have to ensure that the supporting components too are up and running in another region!)
+> I mean configuring a DNS health check to automatically failover to the API Gateway in the secondary region.
+> (We'd also have to ensure that the supporting components too are up and running in another region!)
 > More of a cost-redundancy tradeoff here, Will need to weigh in the benefits against the potential costs incurred, and it really justifies against the current needs of the application 👍
 
 </br>
 
 ### Cost-effective Scalability. How?
 
-1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this
-
+1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this            
+_Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
 
 2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
 
 > The simple equation, I often mention :-        
-> Prewarming a set of lambda instances = Reduces cold starts = Reduces latency 👍
+> **Prewarming a set of lambda instances = Reduces cold starts = Reduces latency** 👍
 
+</br>
 
 ###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
 
@@ -200,14 +201,7 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
 
 --> We've pruned down IAM policies for the service role
-**Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidentiality.
-
-</br>
-
-
-_**Choice of WebSocket APIs over REST APIs:**_ Web-Socket API optimises performance by establishing a long-lived, persistent connections. Eliminating the overhead involved in establishing connections frequently.  
-
-_**NoSQL Database as a connection registry:**_  DynamoDB would be well-suited to handle Connection Metadata here, the low latency access and 
+**Fine-grained Access Control:** Have granted the least privilege access to resources. Lambda functions and DynamoDB tables are secured with fine-grained permissions, ensuring data integrity and confidenti
 
 </br>
 
