@@ -167,11 +167,11 @@ _Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatical
 
 </br>
 
-###  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
+##  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
 
 We had two options at hand:-
 
-####  Approach I was through setting provisioned concurrency
+###  Approach I --> Through setting provisioned concurrency
 
 We'd have a certain number of execution environments - or rather, lambda instances would be running **at all times**
 
@@ -191,7 +191,7 @@ Where **absolutely zero cold starts** are essential, and we need to minimize lat
 
 </br>
 
-#### Our approach --> Implementing a custom Lambda Warmer
+### Our approach --> Implementing a custom Lambda Warmer
 
 Why?
 
@@ -201,7 +201,7 @@ Why?
 
 </br>
 
-#### How did we solve this challenge?
+### How did we solve this challenge?
 
 Implementing a custom Lambda Warmer. 💡
 
@@ -214,7 +214,7 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 
 </br>
 
-#### How exactly is Provisoned Concurrency different from the reserved counterpart?
+### How exactly is Provisoned Concurrency different from the reserved counterpart?
 
  Point 1 --> **When I'm talking about Provisioned Concurrency, it all about eliminating cold starts**, reducing _the initialisation latency_. While **reserved Concurrency is about ensuring we've got a certain portion of the Total Concurrency dedicated** to this lambda.
 
@@ -232,20 +232,33 @@ That could be either every 5 minutes, or fixed, at a time when peak usage is ant
 
 ## From a security standpoint
 
-**Lambda Authorizer - API Gateway Authorization:**
-IAM authorization is implemented for the $connect method using Lambda Authorizer in API Gateway, ensuring secure and controlled access.
+Point 1 --> Data Encryption at rest through KMS Encryption (DynamoDB)
 
-Point 2 --> We've pruned down IAM policies for the service roles attached to the lambdas, dynamo; strictly to what the component _actually_ needs for its functioning/ access.
+> We decided against implementing FGAC or fine-grained access control for DynamoDB, It's main purpose is controlling access to specific attributes, or specific database items.        
+> --> Our schema is pretty simple and straightforward. A single-attribute schema not at all warrants the kind of complexity FGAC brings in. We went ahead with standard IAM policies with table-level access controls      
+> --> But, yes, it's super helpful in case we've got multiple attributes or maybe need specific teams/roles to access only certain partitions of the data. Or we're seeking absolutely locked down security at a very granular level - (Something that IAM Policies lack - IAM Policies operate only at the table level --> FGAC on the other hand operates at the db item / attribute level) - Useful if we're under strict compliance requirements 👍
 
-> Finer the permissions, lesser the ridk of Privilege Escalation 👍
+
+Point 2 --> We've pruned down IAM policies for the service roles attached to the lambdas, dynamo; strictly to what the component _actually_ needs for its functioning/ access. Lesser risk of Privilege Escalation
 
 Point 3 -->  Implementing throttling / rate limiting mitigates a potential DDoS, We've mentioned this above in the availability section too --> this is because we're controlling the number of requests that a user / bot can hit the gateway ✔️
+
+Point 4 --> 
 
 
 ### **What kind of refinements could make my current design even more secure ?**
 
-I'd consider using a WAF - Web Application Firewall,  on top of API gateway. By configuring WAF ACLs and associating them with the API, we can mitigate common web exploits and protect against malicious WebSocket requests.
+I'd consider implementing a WAF on top of the gateway. A significant enhancement this brings along is that it protect's application availability, --> it prevents excessive consumption of resources downstream + averts potential security compomises 👍
 
+</br>
+
+> We could utilise AWS managed rules here, they are pre-configured web security rules, they're designed + maintained by AWS plus they're automatically updated from time to time, This means it abstracts out the need of manual maintenance of IP sets, plus simplifies deployment of such ACLs, redcuing teh operational burden of maintaing these sets.      
+> I feel there might be certain situations, wherein we need to explicitly block specific IP addresses, this does necessitate the need of using a more comprehensive solution having both Custom Rules plus Managed Rule groups in a Web ACL,        
+> This would then make up for a perfect security enhancement, wherein both security and operational overhead associated, have been considered 👍
+
+On a side note, I'd recommend logging these metrics to CloudWatch, And  incrementing the CW metric , in case, it matches specific regex/ attack patterns, You could also configure a CloudWatch Alarm to trigger off a notification via a SNS topic / mail/ message, in the event of the threshold being breached. --> Real -Time Alerting 📌
+
+</br>
 
 **How can I achieve a better Performance Optimisation, while maintaining costs?**
 
