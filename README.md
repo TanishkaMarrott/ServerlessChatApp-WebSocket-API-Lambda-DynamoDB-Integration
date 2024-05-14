@@ -236,14 +236,13 @@ Point 1 --> Data Encryption at rest through KMS Encryption (DynamoDB)
 
 > We decided against implementing FGAC or fine-grained access control for DynamoDB, It's main purpose is controlling access to specific attributes, or specific database items.        
 > --> Our schema is pretty simple and straightforward. A single-attribute schema not at all warrants the kind of complexity FGAC brings in. We went ahead with standard IAM policies with table-level access controls      
-> --> But, yes, it's super helpful in case we've got multiple attributes or maybe need specific teams/roles to access only certain partitions of the data. Or we're seeking absolutely locked down security at a very granular level - (Something that IAM Policies lack - IAM Policies operate only at the table level --> FGAC on the other hand operates at the db item / attribute level) - Useful if we're under strict compliance requirements 👍
-
+> --> But, yes, it's super helpful when we've got  multiple attributes or maybe need specific teams/roles to access only certain partitions of the data. Or we're seeking absolutely locked down security at a very granular level - (Something that IAM Policies lack - IAM Policies operate only at the table level --> FGAC on the other hand operates at the db item / attribute level) - Useful when we're working under strict compliance requirements 👍
 
 Point 2 --> We've pruned down IAM policies for the service roles attached to the lambdas, dynamo; strictly to what the component _actually_ needs for its functioning/ access. Lesser risk of Privilege Escalation
 
 Point 3 -->  Implementing throttling / rate limiting mitigates a potential DDoS, We've mentioned this above in the availability section too --> this is because we're controlling the number of requests that a user / bot can hit the gateway ✔️
 
-Point 4 --> 
+> If we'd be looking at amping up the security aspects of our application, Cognito User Pools would be a better bet, It's not just a solution for user creation/ managaement, it lets you authenticate requests, has MFA, password recovery
 
 
 ### **What kind of refinements could make my current design even more secure ?**
