@@ -96,7 +96,7 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
 
---> DynamoDB automatically replicates data across AZs. This means we're resilient to zonal failures _in a region_
+--> we're resilient to zonal failures _in a region_ 👍
 
 </br>
 
@@ -116,15 +116,14 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 ### Code optimisations that'll help enhancing lambda from a reliability standpoint
 
-We had to ensure we're handling errors gracefully plus having some retry mechanisms for transient errors. 
 
-╰┈➤ We had to ensure we've incorporated some error handling mechanisms within our function logic, This will make sure we're preventing any potential errors/ issues from cascading down, --> Errors can be gracefully handled by our lambda, --> Application's stability ++ 👍
+╰┈➤ We've incorporated some error handling mechanisms within our function logic, This will make sure we're preventing any potential errors/ issues from cascading down, --> Errors can be gracefully handled by our lambda, --> Application's stability ++ 👍
 
 ╰┈➤ We felt it would be necessary for our critical lambda - "SendMessageHandler" to recover from transient/ temporary errors, for instance, network communication errors, or DB Operations, This way we'd be increasing the probability of a successful message delivery.
 
 </br>
 
-> Because, it'll *re-attempt* the operations multiple times, befor it's considered failed
+> Because, it'll *re-attempt* the operations multiple times, before it's considered failed. 
 
 </br>
 
@@ -132,7 +131,7 @@ We had to ensure we're handling errors gracefully plus having some retry mechani
 
 </br>
 
-> So, we're not only giving the error more time to resolve, we're also reducing backpressure on our downstream systems 👍
+> So, we're not only giving the error more time to resolve, we're also reducing backpressure on our downstream systems. This is what I call a Graceful Error Retry 👍
 
 </br>
 
@@ -142,7 +141,7 @@ We had to ensure we're handling errors gracefully plus having some retry mechani
 
 ## If I were to improvise on API Gateway's availability further:-
 
-Even though API Gateway is a managed service, as is inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
+solution:-- Even though API Gateway is a managed service, its inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. 📌 This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
 
 </br>
 
@@ -156,8 +155,9 @@ Even though API Gateway is a managed service, as is inherently resilient to zona
 
 ## Cost-effective Scalability. How?
 
-1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this            
-_Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
+1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this!
+
+_Benefit it brings in:-_ Reduced Costs 👍 Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
 
 </br>
 
@@ -169,7 +169,11 @@ _Benefit it brings in:-_ Helps us control on the costs, Dynamo would automatical
 
  > Yes, this was the _catch_ here.
 >
-> It's absolutely wonderful when you've got unpredictable access patterns, and capacity planning looks difficult. But since it charges you on the actual read/ writes, the cost per unit capacity, turns out to be way higher. If we'd be in a scenario, where there's consistent traffic coming in, levels are pretty much predictable, I'll advise it'll be way more cost-effective to go with a baseline set up for provisioned read./ write units plus auto-scale based on utilisation thresholds.
+> It's absolutely wonderful when you've got unpredictable access patterns, and capacity planning looks difficult.
+>
+> But since it charges you on the actual read/ writes, the cost per unit capacity, turns out to be way higher.
+>
+> If we'd be in a scenario, where there's consistent traffic coming in, levels are pretty much predictable, I'll advise it'll be way more cost-effective to go with a baseline set up for provisioned read./ write units plus auto-scale based on utilisation thresholds. 💡
 
 </br>
 
