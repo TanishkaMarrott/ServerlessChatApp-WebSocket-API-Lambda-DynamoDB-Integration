@@ -63,7 +63,8 @@ Now, that we're through with the functionality, let's now shift our attention to
 
 ### How did we improvise on the application's availability/ reliability?
 
-**1 --> We've set reserved concurrency for our important Lambdas.**         
+**1 --> We've set reserved concurrency for our important Lambdas.**        
+ 
 Our critical lambdas _should_ always have access to sufficient compute for _operational functionality / Service continuity purposes,_
 We're ensuring we've got a certain "quota" of concurrency apportioned for critical lambdas. This'll enable a very _fair distribution of compute_ amongst all the lambdas. 
 
