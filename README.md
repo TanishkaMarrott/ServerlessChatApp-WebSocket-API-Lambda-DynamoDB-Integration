@@ -4,7 +4,7 @@ DynamoWave Chat is a modern and scalable serverless real-time chat application.
 
 It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
-➡️ **Our core focus here:** _Enhancing the application to ensure a  high-performance delivery._
+➡️ **Our core focus here:** _Enhancing the application from a non-functional standpoint --> Making it Scalable + Performant._
 
 </br>
 
@@ -37,8 +37,11 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
 We'll quickly define the purpose of each component in our architecture:-
 
+</br>
+
 > Please make sure to check out the cloudFormation template above, for the initial configurations plus the deployment
 
+</br>
 
 | Services we've used        | Identifiers    | Purpose --> Why we've used?                       |
 |--------------------|---------------------|-------------------------------|
@@ -61,12 +64,12 @@ Now, that we're through with the functionality, let's now shift our attention to
 ### How did we improvise on the application's availability/ reliability?
 
 **1 --> We've set reserved concurrency for our important Lambdas.**         
-Our critical lambdas _should_ always have access to sufficient compute for operational functionality / Service continuity purposes,
-We're ensuring we've got a certain quota of concurrency apportioned to the lambda. this'll enable a very fair distribution of compute amongst all the lambdas. 
+Our critical lambdas _should_ always have access to sufficient compute for _operational functionality / Service continuity purposes,_
+We're ensuring we've got a certain "quota" of concurrency apportioned for critical lambdas. This'll enable a very _fair distribution of compute_ amongst all the lambdas. 
 
 </br>
  
-> This helps us prevent critical Lambdas from being throttled during peak times. I'd say that we're "allocating" a portion of the total concurrency to the spciifc lambda function. It'll always have the resources it needs to run/ function smoothly 👍
+> This helps us prevent critical Lambdas from being throttled during peak times. I'd say that we're "allocating" a portion of the total concurrency to the speciifc lambda function. It'll always have the resources it needs to run/ function smoothly 👍
 
 </br>
 
@@ -88,8 +91,9 @@ We're ensuring we've got a certain quota of concurrency apportioned to the lambd
 
 > Why exactly did we implement this?
 >          
-> --> We're predefining a threshold on the maximum number of requests that can hit the gateway per second --> max number of requests per second)
-> --> Plus, a cap on the total number of requests originating from a particular client --> in a specific time window. This has a strategic advantage to it, from an availability standpoint, This'll prevent downstream services from being overwhelmed.
+> --> We're defining a threshold on the maximum number of requests that can hit the gateway per second --> max number of requests per second)
+> --> Plus, a cap on the total number of requests originating from a particular client --> in a specific time window. There's an advantage to it, from an availability standpoint, Requests from a single client won't bog down/ overwhelm downstream services.
+> 
 > ➡️ So, The API would stay responsive to legitimate users, Plus, helps us avert a potential DDoS, that might bring down our entire system.
 
 </br>
