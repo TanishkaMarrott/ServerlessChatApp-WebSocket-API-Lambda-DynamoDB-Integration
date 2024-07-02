@@ -132,43 +132,59 @@ We're ensuring we've got a certain "quota" of concurrency apportioned for critic
 
 </br>
 
-╰┈➤ Incessant retries would lead us to a scenario wherein the function might enter into an infinite loop, and we'd want to prevent this, Hence, we had to make usre we've got some exponential backoffs in place too, along with the retry mechanisma, This would then iteratively increase the time interval between two subsequent retries. 
+╰┈➤ Incessant retries would create a scenario wherein the function might enter into an infinite loop of faiures. And we should prevent this at all costs. Hence, we had to incorporate "exponential backoffs", as a part of our code, along with the retry mechanisms. This means we'd be iteratively increasing the time interval between two subsequent retries. 👍 
 
 </br>
 
-> So, we're not only giving the error more time to resolve, we're also reducing backpressure on our downstream systems. This is what I call a Graceful Error Retry 👍
+> So, we're not only giving the error more time to resolve, we're also reducing backpressure on our downstream systems. This is what I call a Graceful Error Retry mechanism 👍
 
 </br>
 
-╰┈➤ An additional enhancement, we'd consider making in the second iteration, as a part of refining my architecture further, would be to set up a DLQ - dead Letter Queue to store failed delivery messages --> this would mean zero data loss, and also provides a potential opportunity to re-process and analyse these messages further. 
+╰┈➤ An additional enhancement we'd consider making in future (as a part of refining my architecture even further), would be to set up a DLQ - Dead Letter Queue to store failed delivery messages.
+
+ --> This would mean **Zero data loss**. Plus, provide us with a potential opportunity to re-process and analyse these messages at a later point in time. 
 
 </br>
 
 ## If I were to improvise on API Gateway's availability further:-
 
-solution:-- Even though API Gateway is a managed service, its inherently resilient to zonal failures, there might be situations wherein we'd like to implement regional redundancy for API Gateway. 📌 This could be done by deploying the gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
+</br>
+
+> The API Gateway might turn out to be a Single Point of Failure (SPOF), in your system... And if you're like me, who aims for a truly resilient system, you won't let that happen 🙂
 
 </br>
 
-> I mean configuring a DNS health check to automatically failover to the API Gateway in the secondary region.
+Solution:-- Even though API Gateway is a managed service [ its inherently resilient to zonal failures ], there might be situations wherein it would be imperative to embed regional redundancy for the API Gateway. 
+
+📌 This could be done by deploying the API gateway in multiple regions, and then utilising Route 53 for a DNS Failover. 
+
+</br>
+
+> I mean configuring a DNS health check to automatically failover to the API Gateway in the secondary region. --> a full secondary failover
 > 
-> (We'd also have to ensure that the supporting components too are up and running in another region!)
+> (We'd also have to ensure that the supporting components are up and running in the secondary region!)
 >
-> More of a cost-redundancy tradeoff here, Will need to weigh in the benefits against the potential costs incurred, and it really justifies against the current needs of the application 👍
+> More of a cost-redundancy tradeoff here.
+>
+>  Will need to weigh in the benefits against the potential costs incurred and if it really justifies against the current needs of the application 👍
 
 </br>
 
 ## Cost-effective Scalability. How?
 
-1 --> I'd come across adaptive auto-scaling for DynamoDB, and I knew I had to utilise this!
+1 --> The first thing that comes to my head :- Adaptive / Dynamic auto-scaling for our DynamoDB. 
 
-_Benefit it brings in:-_ Reduced Costs 👍 Dynamo would automatically adjust the workload based on the fluctauting requirements. This means it's making resource utilisation all the more efficient. 👍
+_Benefit it brings in:-_ Reduced Costs 👍 DynamoDB would automatically adjust its capacity in response to the fluctuating workload. This means it's making resource utilisation all the more efficient. 👍
 
 </br>
 
-#### We had to choose between On-demand throughput versus Provisoned Throughput + Auto-scaling. Which one did we opt while designing this?
+A common question I've often heard:-
 
- i. We had to consider the price point here. The "Per-unit cost" was turning out to be expensive for the on-demand mode than the provisioned counterpart + Autoscaling.
+#### We need to choose between On-Demand Throughput v/s Provisoned Throughput + Auto-scaling. Which combination should we opt for and why?
+
+ i. We would need to consider the price point here. 
+
+The "Per- Unit cost" for the On-Demand Mode turns out to be more expensive, than it's provisioned counterpart + Autoscaling.
 
 </br>
 
@@ -186,7 +202,8 @@ _Benefit it brings in:-_ Reduced Costs 👍 Dynamo would automatically adjust th
 
 2 --> We had to eliminate lambda cold starts for improvising on the performance plus scalability of the application
 
-> The simple equation, I often mention :-        
+> The simple equation, I often mention :-
+>   
 > **Prewarming a set of lambda instances = Reduces cold starts = Reduces latency** 👍
 
 </br>
