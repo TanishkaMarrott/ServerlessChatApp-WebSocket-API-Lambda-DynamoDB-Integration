@@ -207,7 +207,7 @@ The "Per- Unit cost" for the On-Demand Mode turns out to be more expensive, than
 
 </br>
 
-##  How could we actually optimise for performance in Lambda (while still taking the costs into consideration)?
+###  How could we actually optimise for performance in Lambda (while taking costs into consideration)?
 
 We had two options at hand:-
 
