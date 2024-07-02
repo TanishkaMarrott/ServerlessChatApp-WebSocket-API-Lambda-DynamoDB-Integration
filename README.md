@@ -99,9 +99,7 @@ We're ensuring we've got a certain "quota" of concurrency apportioned for critic
 
 </br>
 
-**4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
-
---> We're resilient to zonal failures _in a region_ 👍
+**4 --> We're resilient to outages, _But only to zonal failures in a region_** 👍
 
 </br>
 
@@ -118,7 +116,7 @@ We're ensuring we've got a certain "quota" of concurrency apportioned for critic
 
 </br>
 
-### Code optimisations that'll help enhancing Lambda from a reliability standpoint
+### Code optimizations --> For enhancing Lambda from a reliability standpoint
 
 
 ╰┈➤ We've incorporated some error handling mechanisms within our function logic, This will make sure we're preventing any potential errors/ issues from cascading down, --> Errors can be gracefully handled by our lambda, --> Application's stability ++ 👍
