@@ -101,7 +101,7 @@ We're ensuring we've got a certain "quota" of concurrency apportioned for critic
 
 **4 --> Multi-AZ Deployments => Data Redundancy => High Availability**
 
---> we're resilient to zonal failures _in a region_ 👍
+--> We're resilient to zonal failures _in a region_ 👍
 
 </br>
 
@@ -118,8 +118,7 @@ We're ensuring we've got a certain "quota" of concurrency apportioned for critic
 
 </br>
 
-
-### Code optimisations that'll help enhancing lambda from a reliability standpoint
+### Code optimisations that'll help enhancing Lambda from a reliability standpoint
 
 
 ╰┈➤ We've incorporated some error handling mechanisms within our function logic, This will make sure we're preventing any potential errors/ issues from cascading down, --> Errors can be gracefully handled by our lambda, --> Application's stability ++ 👍
@@ -161,16 +160,14 @@ Solution:-- Even though API Gateway is a managed service [ its inherently resili
 </br>
 
 > I mean configuring a DNS health check to automatically failover to the API Gateway in the secondary region. --> a full secondary failover
-> 
 > (We'd also have to ensure that the supporting components are up and running in the secondary region!)
->
+> 
 > More of a cost-redundancy tradeoff here.
->
 >  Will need to weigh in the benefits against the potential costs incurred and if it really justifies against the current needs of the application 👍
 
 </br>
 
-## Cost-effective Scalability. How?
+## Cost-effective scalability. How?
 
 1 --> The first thing that comes to my head :- Adaptive / Dynamic auto-scaling for our DynamoDB. 
 
@@ -180,16 +177,18 @@ _Benefit it brings in:-_ Reduced Costs 👍 DynamoDB would automatically adjust 
 
 A common question I've often heard:-
 
-#### We need to choose between On-Demand Throughput v/s Provisoned Throughput + Auto-scaling. Which combination should we opt for and why?
+### Q - We need to choose between On-Demand Throughput v/s Provisoned Throughput + Auto-scaling. Which combination should we opt for and why?
+
+</br>
+
+My answer to this :-
 
  i. We would need to consider the price point here. 
-
 The "Per- Unit cost" for the On-Demand Mode turns out to be more expensive, than it's provisioned counterpart + Autoscaling.
 
 </br>
 
  > Yes, this was the _catch_ here.
->
 > It's absolutely wonderful when you've got unpredictable access patterns, and capacity planning looks difficult.
 >
 > But since it charges you on the actual read/ writes, the cost per unit capacity, turns out to be way higher.
