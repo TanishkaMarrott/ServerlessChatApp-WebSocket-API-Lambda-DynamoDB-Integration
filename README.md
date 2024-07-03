@@ -16,7 +16,8 @@ It's built on top of AWS Services --> Lambda, DynamoDB & API Gateway
 
 ## **How does the workflow look like?**
 
-                  We'll first establish the websocket connection
+                  We'll first establish the websocket connection        
+                  ( WebSocket API means two-way communication, between the client and the server)
                         ⬇️
                   It'll trigger the ConnectHandler lambda
                         ⬇️
